@@ -1,6 +1,7 @@
-import axios from 'axios'
+import axios, { type AxiosRequestHeaders, type InternalAxiosRequestConfig } from 'axios'
 
 import { useAuthStore } from '../../stores/auth'
+import { useTenantStore } from '../../stores/tenant'
 import { emitAuthUnauthorized } from '../events'
 import { getApiBaseUrl } from './baseUrl'
 
@@ -11,11 +12,21 @@ export const api = axios.create({
   },
 })
 
+function setHeader(config: InternalAxiosRequestConfig, key: string, value: string) {
+  config.headers = config.headers ?? {}
+  const headers = config.headers as AxiosRequestHeaders
+  headers[key] = value
+}
+
 api.interceptors.request.use((config) => {
   const authStore = useAuthStore()
   if (authStore.token) {
-    config.headers = config.headers ?? {}
-    config.headers.Authorization = `Bearer ${authStore.token}`
+    setHeader(config, 'Authorization', `Bearer ${authStore.token}`)
+  }
+
+  const tenantStore = useTenantStore()
+  if (tenantStore.activeCompanyId) {
+    setHeader(config, 'X-Company-Id', tenantStore.activeCompanyId)
   }
   return config
 })

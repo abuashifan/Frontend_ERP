@@ -8,6 +8,7 @@ import { router } from './router'
 import './style.css'
 import App from './App.vue'
 import { useAuthStore } from './stores/auth'
+import { useTenantStore } from './stores/tenant'
 import { AUTH_UNAUTHORIZED_EVENT } from './lib/events'
 import { AUTH_ENABLED } from './config/auth'
 
@@ -16,6 +17,7 @@ app.use(pinia)
 
 // Bootstrap persisted auth token early.
 useAuthStore().loadFromStorage()
+useTenantStore().loadFromStorage()
 
 app.use(router)
 app.use(ElementPlus)

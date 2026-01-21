@@ -171,9 +171,11 @@ Last updated: 2026-01-21
 - Inject `Authorization: Bearer <token>` from Pinia auth store
 - On HTTP 401: clear token and emit `auth:unauthorized` event
 
-[6.3] Multi-tenant header support — NOT STARTED
 
-- `X-Company-Id` injection
+[6.3] Multi-tenant header support — COMPLETED (2026-01-21)
+
+- `X-Company-Id` injection via axios request interceptor
+- Tenant store persists active company id in `localStorage`
 
 [6.4] Tenant context UI — NOT STARTED
 

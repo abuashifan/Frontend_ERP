@@ -72,7 +72,8 @@ Form safety:
 ## Backend Integration Constraints
 
 - Backend is Laravel API (headless).
-- Frontend should be prepared for multi-tenant header usage (`X-Company-Id`) on API calls.
+- Multi-tenant header injection (`X-Company-Id`) is implemented via axios interceptor.
+- Tenant selection UI is still pending; active company id is stored in Pinia + `localStorage`.
 
 Auth endpoint note (current state):
 
