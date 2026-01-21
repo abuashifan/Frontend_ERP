@@ -13,9 +13,9 @@ Last updated: 2026-01-21
 
 ## PHASE 0 — PROJECT FOUNDATION
 
-[0.1] Separate frontend repository — NOT STARTED
-- Create a new git repository for frontend (separate from backend)
-- Define branching + release strategy
+[0.1] Separate frontend repository — IN PROGRESS (2026-01-21)
+- Initialized local git repository in `Frontend_ERP` with initial commit on `main`
+- Pending: add remote origin and push
 
 [0.2] Initialize Vue 3 project (SPA) — COMPLETED
 - Vue 3 + Vite + TypeScript scaffolded
