@@ -9,6 +9,7 @@ import './style.css'
 import App from './App.vue'
 import { useAuthStore } from './stores/auth'
 import { AUTH_UNAUTHORIZED_EVENT } from './lib/events'
+import { AUTH_ENABLED } from './config/auth'
 
 const app = createApp(App)
 app.use(pinia)
@@ -20,6 +21,8 @@ app.use(router)
 app.use(ElementPlus)
 app.mount('#app')
 
-window.addEventListener(AUTH_UNAUTHORIZED_EVENT, () => {
-	router.replace('/login')
-})
+if (AUTH_ENABLED) {
+	window.addEventListener(AUTH_UNAUTHORIZED_EVENT, () => {
+		router.replace('/login')
+	})
+}

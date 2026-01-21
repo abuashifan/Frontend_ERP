@@ -7,6 +7,7 @@ import VirtualTabsBar from '../components/VirtualTabsBar.vue'
 import VirtualTabsHost from '../components/VirtualTabsHost.vue'
 import { useAuthStore } from '../stores/auth'
 import { useTabsStore } from '../stores/tabs'
+import { AUTH_ENABLED } from '../config/auth'
 
 type MenuItem = {
   id: string
@@ -19,6 +20,7 @@ type MenuItem = {
 const tabsStore = useTabsStore()
 const authStore = useAuthStore()
 const router = useRouter()
+const authEnabled = AUTH_ENABLED
 
 const menuItems = computed<MenuItem[]>(() => [
   {
@@ -88,7 +90,7 @@ function logout() {
       >
         <div>Backend: Laravel API</div>
         <div class="flex items-center gap-2">
-          <el-button size="small" @click="logout">Logout</el-button>
+          <el-button v-if="authEnabled" size="small" @click="logout">Logout</el-button>
         </div>
       </el-header>
 

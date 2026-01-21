@@ -4,6 +4,7 @@ import ErpShell from '../layouts/ErpShell.vue'
 import LoginView from '../views/LoginView.vue'
 
 import { useAuthStore } from '../stores/auth'
+import { AUTH_ENABLED } from '../config/auth'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -24,6 +25,11 @@ export const router = createRouter({
 })
 
 router.beforeEach((to) => {
+  if (!AUTH_ENABLED) {
+    if (to.path === '/login') return { path: '/app' }
+    return
+  }
+
   const authStore = useAuthStore()
   const isPublic = Boolean(to.meta.public)
 
