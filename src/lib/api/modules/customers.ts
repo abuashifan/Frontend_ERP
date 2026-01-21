@@ -1,6 +1,7 @@
 import type { AxiosResponse } from 'axios'
 
 import { api } from '../client'
+import { useTenantStore } from '../../../stores/tenant'
 
 type ApiEnvelope<T> = {
   data: T
@@ -21,7 +22,15 @@ export type Customer = {
 }
 
 export async function listCustomers(): Promise<Customer[]> {
-  const res: AxiosResponse<ApiEnvelope<Customer[]>> = await api.get('/customers')
+  const tenantStore = useTenantStore()
+  if (!tenantStore.activeCompanyId) {
+    throw new Error('company_id belum diset. Set `VITE_COMPANY_ID` atau aktifkan tenant switcher.')
+  }
+
+  const companyId = Number(tenantStore.activeCompanyId)
+  const res: AxiosResponse<ApiEnvelope<Customer[]>> = await api.get('/customers', {
+    params: { company_id: companyId },
+  })
   return res.data.data
 }
 
