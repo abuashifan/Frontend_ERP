@@ -23,14 +23,14 @@ function save() {
 </script>
 
 <template>
-  <div class="p">
-    <div class="title-row">
+  <div class="p-4">
+    <div class="flex items-center gap-3">
       <h2>Sales Invoice {{ invoiceId }}</h2>
       <el-tag v-if="dirty" type="warning">Unsaved</el-tag>
       <el-tag v-else type="success">Saved</el-tag>
     </div>
 
-    <el-form label-width="120px" class="form">
+    <el-form label-width="120px" class="max-w-[720px]">
       <el-form-item label="Invoice ID">
         <el-input v-model="form.invoiceId" disabled />
       </el-form-item>
@@ -45,17 +45,3 @@ function save() {
     </el-form>
   </div>
 </template>
-
-<style scoped>
-.p {
-  padding: 16px;
-}
-.title-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.form {
-  max-width: 720px;
-}
-</style>

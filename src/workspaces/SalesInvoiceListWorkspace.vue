@@ -23,7 +23,7 @@ function openInvoice(invoiceId: string) {
 </script>
 
 <template>
-  <div class="p">
+  <div class="p-4">
     <h2>Sales Invoices</h2>
     <p>Contoh list. Klik untuk membuka instance tab baru (unik per ID).</p>
 
@@ -34,9 +34,3 @@ function openInvoice(invoiceId: string) {
     </el-space>
   </div>
 </template>
-
-<style scoped>
-.p {
-  padding: 16px;
-}
-</style>

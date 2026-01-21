@@ -60,10 +60,17 @@ function logout() {
 </script>
 
 <template>
-  <el-container class="shell">
-    <el-aside width="240px" class="aside">
-      <div class="brand">ERP</div>
-      <el-menu class="menu" :default-active="tabsStore.activeTabId ?? undefined">
+  <el-container class="h-screen">
+    <el-aside
+      width="240px"
+      class="border-r border-[var(--el-border-color-light)] bg-[var(--el-bg-color)]"
+    >
+      <div
+        class="h-14 flex items-center px-4 font-bold border-b border-[var(--el-border-color-light)]"
+      >
+        ERP
+      </div>
+      <el-menu :default-active="tabsStore.activeTabId ?? undefined">
         <el-menu-item
           v-for="item in menuItems"
           :key="item.id"
@@ -75,59 +82,21 @@ function logout() {
       </el-menu>
     </el-aside>
 
-    <el-container class="main">
-      <el-header class="header">
-        <div class="header-left">Backend: Laravel API</div>
-        <div class="header-right">
+    <el-container>
+      <el-header
+        class="h-14 flex items-center justify-between px-3 border-b border-[var(--el-border-color-light)]"
+      >
+        <div>Backend: Laravel API</div>
+        <div class="flex items-center gap-2">
           <el-button size="small" @click="logout">Logout</el-button>
         </div>
       </el-header>
 
       <VirtualTabsBar />
 
-      <el-main class="content">
+      <el-main class="min-h-0 !p-0">
         <VirtualTabsHost />
       </el-main>
     </el-container>
   </el-container>
 </template>
-
-<style scoped>
-.shell {
-  height: 100vh;
-}
-
-.aside {
-  border-right: 1px solid var(--el-border-color-light);
-  background: var(--el-bg-color);
-}
-
-.brand {
-  height: 56px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  font-weight: 700;
-  border-bottom: 1px solid var(--el-border-color-light);
-}
-
-.header {
-  height: 56px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--el-border-color-light);
-  justify-content: space-between;
-  padding: 0 12px;
-}
-
-.header-right {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.content {
-  padding: 0;
-  min-height: 0;
-}
-</style>

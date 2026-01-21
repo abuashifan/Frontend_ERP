@@ -101,5 +101,10 @@ When a decision changes, record it in `docs/decisions.md` and add an entry to `d
 
 ## Implementation Notes (Current)
 
-- Stack: Vue 3 + Vite + TS, Pinia, Vue Router (limited), Element Plus, Tailwind.
+- Stack: Vue 3 + Vite + TS, Pinia, Vue Router (limited), Element Plus (components), Tailwind (styling).
 - Virtual tab skeleton implemented (Tab store + KeepAlive host + close confirm).
+
+Styling rule (maintenance):
+
+- Use Tailwind utilities for styling.
+- Avoid component-scoped CSS (`<style scoped>`) to keep styling consistent and easy to maintain.

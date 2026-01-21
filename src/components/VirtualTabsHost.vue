@@ -17,8 +17,10 @@ const activeProps = computed(() => activeTab.value?.props ?? {})
 </script>
 
 <template>
-  <div class="virtual-tabs-host">
-    <div v-if="!activeTab" class="empty">Pilih menu untuk membuka workspace.</div>
+  <div class="h-full min-h-0">
+    <div v-if="!activeTab" class="p-4 text-[var(--el-text-color-secondary)]">
+      Pilih menu untuk membuka workspace.
+    </div>
 
     <KeepAlive :max="MAX_OPEN_TABS">
       <component
@@ -30,19 +32,8 @@ const activeProps = computed(() => activeTab.value?.props ?? {})
       />
     </KeepAlive>
 
-    <div v-if="activeTab && !activeComponent" class="empty">
+    <div v-if="activeTab && !activeComponent" class="p-4 text-[var(--el-text-color-secondary)]">
       Component registry tidak ditemukan: <b>{{ activeTab.component }}</b>
     </div>
   </div>
 </template>
-
-<style scoped>
-.virtual-tabs-host {
-  height: 100%;
-  min-height: 0;
-}
-.empty {
-  padding: 16px;
-  color: var(--el-text-color-secondary);
-}
-</style>

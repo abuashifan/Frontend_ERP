@@ -40,19 +40,29 @@ async function attemptClose(id: string) {
 </script>
 
 <template>
-  <div class="tabs-bar">
+  <div
+    class="flex gap-2 items-center px-3 py-2 overflow-x-auto border-b border-[var(--el-border-color-light)] bg-[var(--el-bg-color)]"
+  >
     <div
       v-for="tab in tabs"
       :key="tab.id"
-      class="tab"
-      :class="{ active: tab.id === activeTabId, dirty: tab.dirty }"
+      class="inline-flex items-center gap-2 px-2.5 py-1.5 border border-[var(--el-border-color-light)] rounded-lg cursor-pointer select-none whitespace-nowrap"
+      :class="
+        tab.id === activeTabId
+          ? 'border-[var(--el-color-primary)] bg-[var(--el-color-primary-light-9)]'
+          : ''
+      "
       @click="activate(tab.id)"
     >
-      <span class="title">{{ tab.title }}</span>
-      <span v-if="tab.dirty" class="dot" title="Unsaved changes" />
+      <span class="text-sm">{{ tab.title }}</span>
+      <span
+        v-if="tab.dirty"
+        class="w-2 h-2 rounded-full bg-[var(--el-color-warning)]"
+        title="Unsaved changes"
+      />
       <button
         v-if="tab.closable"
-        class="close"
+        class="inline-flex items-center justify-center border-0 bg-transparent p-0 cursor-pointer text-[var(--el-text-color-secondary)] hover:text-[var(--el-text-color-primary)]"
         type="button"
         title="Close"
         @click.stop="attemptClose(tab.id)"
@@ -62,58 +72,3 @@ async function attemptClose(id: string) {
     </div>
   </div>
 </template>
-
-<style scoped>
-.tabs-bar {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 8px 12px;
-  overflow-x: auto;
-  border-bottom: 1px solid var(--el-border-color-light);
-  background: var(--el-bg-color);
-}
-
-.tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border: 1px solid var(--el-border-color-light);
-  border-radius: 8px;
-  cursor: pointer;
-  user-select: none;
-  white-space: nowrap;
-}
-
-.tab.active {
-  border-color: var(--el-color-primary);
-  background: var(--el-color-primary-light-9);
-}
-
-.title {
-  font-size: 13px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--el-color-warning);
-}
-
-.close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
-  color: var(--el-text-color-secondary);
-}
-
-.close:hover {
-  color: var(--el-text-color-primary);
-}
-</style>
