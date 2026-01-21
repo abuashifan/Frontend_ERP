@@ -10,6 +10,7 @@ import {
   type CreateCustomerPayload,
 } from '../lib/api/modules/customers'
 import { useTabDirty } from '../composables/useTabDirty'
+import { useTabsStore } from '../stores/tabs'
 
 const props = defineProps<{ tabId: string; mode: 'create' | 'edit'; customerId?: number }>()
 
@@ -19,6 +20,7 @@ const saving = ref(false)
 const loaded = ref(false)
 
 const { dirty, markDirty, clearDirty } = useTabDirty(props.tabId)
+const tabsStore = useTabsStore()
 
 const model = ref<CreateCustomerPayload>({
   code: '',
@@ -83,6 +85,7 @@ async function save() {
       ElMessage.success('Customer created')
     }
     clearDirty()
+    tabsStore.closeChildTab(props.tabId)
   } catch (err: unknown) {
     const maybe = err as { response?: { data?: { message?: unknown } }; message?: unknown }
     ElMessage.error(String(maybe?.response?.data?.message ?? maybe?.message ?? 'Gagal menyimpan customer'))

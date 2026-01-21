@@ -11,6 +11,7 @@ import {
   type CreateProductPayload,
 } from '../lib/api/modules/products'
 import { useTabDirty } from '../composables/useTabDirty'
+import { useTabsStore } from '../stores/tabs'
 
 const props = defineProps<{ tabId: string; mode: 'create' | 'edit'; productId?: number }>()
 
@@ -20,6 +21,7 @@ const saving = ref(false)
 const loaded = ref(false)
 
 const { dirty, markDirty, clearDirty } = useTabDirty(props.tabId)
+const tabsStore = useTabsStore()
 
 const model = ref<CreateProductPayload>({
   code: '',
@@ -85,6 +87,7 @@ async function save() {
       ElMessage.success('Product created')
     }
     clearDirty()
+    tabsStore.closeChildTab(props.tabId)
   } catch (err: unknown) {
     const maybe = err as { response?: { data?: { message?: unknown } }; message?: unknown }
     ElMessage.error(String(maybe?.response?.data?.message ?? maybe?.message ?? 'Gagal menyimpan product'))

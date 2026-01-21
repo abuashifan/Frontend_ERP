@@ -31,7 +31,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
   {
     id: 'customers',
     title: 'Customers',
-    showSubTabsBar: false,
+    showSubTabsBar: true,
     defaultChild: {
       localId: 'list',
       title: 'Customers',
@@ -43,7 +43,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
   {
     id: 'vendors',
     title: 'Vendors',
-    showSubTabsBar: false,
+    showSubTabsBar: true,
     defaultChild: {
       localId: 'list',
       title: 'Vendors',
@@ -55,7 +55,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
   {
     id: 'products',
     title: 'Products',
-    showSubTabsBar: false,
+    showSubTabsBar: true,
     defaultChild: {
       localId: 'list',
       title: 'Products',
@@ -67,7 +67,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
   {
     id: 'warehouses',
     title: 'Warehouses',
-    showSubTabsBar: false,
+    showSubTabsBar: true,
     defaultChild: {
       localId: 'list',
       title: 'Warehouses',
