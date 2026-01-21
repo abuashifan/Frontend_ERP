@@ -42,17 +42,22 @@ const menuItems = computed<MenuItem[]>(() => [
       closable: false,
     },
   },
-  {
-    id: 'sales-invoices',
-    title: 'Sales Invoices',
-    showSubTabsBar: true,
-    defaultChild: {
-      localId: 'list',
-      title: 'Sales Invoices',
-      component: 'SalesInvoiceListWorkspace',
-      closable: false,
-    },
-  },
+  ...Array.from({ length: 5 }, (_, i) => {
+    const n = i + 1
+    const title = n === 1 ? 'Sales Invoices' : `Sales Invoices (${n})`
+
+    return {
+      id: `sales-invoices-${n}`,
+      title,
+      showSubTabsBar: true,
+      defaultChild: {
+        localId: 'list',
+        title,
+        component: 'SalesInvoiceListWorkspace',
+        closable: false,
+      },
+    } satisfies MenuItem
+  }),
 ])
 
 function openMenu(item: MenuItem) {
