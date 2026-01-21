@@ -59,8 +59,13 @@ onMounted(async () => {
   try {
     const bootstrap = await getBootstrap()
 
-    if (bootstrap.data.singleCompanyId && !tenantStore.activeCompanyId) {
-      tenantStore.setActiveCompanyId(String(bootstrap.data.singleCompanyId))
+    // Single-company mode: keep the frontend tenant id in sync with backend.
+    // This prevents stale localStorage company ids after `migrate:fresh --seed`.
+    if (!tenantSwitcherEnabled && bootstrap.data.singleCompanyId) {
+      const desired = String(bootstrap.data.singleCompanyId)
+      if (tenantStore.activeCompanyId !== desired) {
+        tenantStore.setActiveCompanyId(desired)
+      }
     }
 
     if (bootstrap.data.setupRequired) {
