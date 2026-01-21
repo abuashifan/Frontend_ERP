@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 
 import VirtualTabsBar from '../components/VirtualTabsBar.vue'
 import VirtualSubTabsBar from '../components/VirtualSubTabsBar.vue'
 import VirtualTabsHost from '../components/VirtualTabsHost.vue'
+import TenantSwitcher from '../components/TenantSwitcher.vue'
 import { useAuthStore } from '../stores/auth'
 import { useTabsStore } from '../stores/tabs'
 import { AUTH_ENABLED } from '../config/auth'
@@ -80,10 +81,11 @@ function openMenu(item: MenuItem) {
   }
 }
 
-if (tabsStore.modules.length === 0) {
+watchEffect(() => {
+  if (tabsStore.modules.length !== 0) return
   const first = menuItems.value[0]
   if (first) openMenu(first)
-}
+})
 
 function logout() {
   authStore.clear()
@@ -120,6 +122,7 @@ function logout() {
       >
         <div>Backend: Laravel API</div>
         <div class="flex items-center gap-2">
+          <TenantSwitcher />
           <el-button v-if="authEnabled" size="small" @click="logout">Logout</el-button>
         </div>
       </el-header>

@@ -177,11 +177,12 @@ Last updated: 2026-01-21
 - `X-Company-Id` injection via axios request interceptor
 - Tenant store persists active company id in `localStorage`
 
-[6.4] Tenant context UI — NOT STARTED
 
-- Define how user selects active company
-- Persist active company (store + localStorage)
-- Ensure all API calls include the active tenant header
+[6.4] Tenant context UI — IN PROGRESS (2026-01-21)
+
+- Implemented manual company selector (sets persisted `activeCompanyId`)
+- On change, app resets virtual tabs to avoid cross-tenant state leakage
+- Next: replace manual input with company dropdown from backend endpoint (if/when added)
 
 ---
 

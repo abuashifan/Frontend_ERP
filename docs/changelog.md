@@ -14,3 +14,4 @@ All notable changes to frontend rules/behavior are documented here.
 - Refactored Virtual Tabs into two levels: module tabs (menu) + workspace sub-tabs per module.
 - Hide sub-tab bar for modules that don't need child tabs (e.g., Dashboard).
 - Implement multi-tenant header injection (`X-Company-Id`) via axios + tenant store (no UI yet).
+- Add initial tenant context UI (manual Company ID input) and reset tabs when switching.
