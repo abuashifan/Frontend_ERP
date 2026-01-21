@@ -11,6 +11,7 @@ export type BootstrapResponse = {
       name: string
       base_currency: string
       fiscal_year_start_month: number
+      fiscal_year_start_year: number
       timezone: string
       is_active: boolean
     } | null
@@ -27,6 +28,7 @@ export type SetupCompanyPayload = {
   code?: string
   base_currency?: string
   fiscal_year_start_month?: number
+  fiscal_year_start_year: number
   timezone?: string
   profile?: Record<string, unknown>
 }
@@ -40,6 +42,7 @@ export type SetupCompanyResponse = {
       name: string
       base_currency: string
       fiscal_year_start_month: number
+      fiscal_year_start_year: number
       timezone: string
       is_active: boolean
     }

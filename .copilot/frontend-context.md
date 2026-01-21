@@ -80,6 +80,7 @@ Initial company setup (single-company mode):
 - App calls `GET /api/system/bootstrap` on shell mount
 - If `setupRequired=true`, app redirects to `/setup/company`
 - Setup creates the first company and binds `system.single_company_id` in backend settings
+- Setup requires `fiscal_year_start_year` and will initialize periods/COA in backend for single-company deployments
 
 Auth endpoint note (current state):
 
@@ -116,7 +117,8 @@ When a decision changes, record it in `docs/decisions.md` and add an entry to `d
   - Level 1 module tabs (sidebar)
   - Level 2 workspace tabs within a module
 - KeepAlive is bounded and protected with an explicit LRU eviction strategy (never auto-evict dirty tabs).
-- Auth guard exists but can be disabled for dev via `VITE_AUTH_ENABLED=false`.
+- Auth is enabled by default (`VITE_AUTH_ENABLED=true` in `.env.example`) but can be disabled for dev via `VITE_AUTH_ENABLED=false`.
+- `/setup/company` is treated as a public route so initial provisioning can be completed even when auth is enabled.
 
 Styling rule (maintenance):
 

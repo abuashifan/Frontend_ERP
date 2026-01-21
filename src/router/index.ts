@@ -21,6 +21,7 @@ export const router = createRouter({
       path: '/setup/company',
       name: 'setup-company',
       component: SetupCompanyView,
+      meta: { public: true },
     },
     {
       path: '/app',

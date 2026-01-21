@@ -11,6 +11,7 @@ type FormModel = {
   code: string
   base_currency: string
   fiscal_year_start_month: number
+  fiscal_year_start_year: number
   timezone: string
 }
 
@@ -23,6 +24,7 @@ const form = ref<FormModel>({
   code: '',
   base_currency: 'IDR',
   fiscal_year_start_month: 1,
+  fiscal_year_start_year: new Date().getFullYear(),
   timezone: 'Asia/Jakarta',
 })
 
@@ -38,6 +40,7 @@ async function submit() {
       code: form.value.code.trim() || undefined,
       base_currency: form.value.base_currency.trim() || undefined,
       fiscal_year_start_month: form.value.fiscal_year_start_month,
+      fiscal_year_start_year: form.value.fiscal_year_start_year,
       timezone: form.value.timezone.trim() || undefined,
     }
 
@@ -83,10 +86,14 @@ async function submit() {
             <el-input-number v-model="form.fiscal_year_start_month" :min="1" :max="12" />
           </el-form-item>
 
-          <el-form-item label="Timezone">
-            <el-input v-model="form.timezone" placeholder="Asia/Jakarta" />
+          <el-form-item label="Tahun Mulai Tahun Fiskal">
+            <el-input-number v-model="form.fiscal_year_start_year" :min="2000" :max="2100" />
           </el-form-item>
         </div>
+
+        <el-form-item label="Timezone">
+          <el-input v-model="form.timezone" placeholder="Asia/Jakarta" />
+        </el-form-item>
 
         <div class="flex justify-end mt-4">
           <el-button type="primary" :loading="loading" :disabled="!canSubmit" @click="submit">
