@@ -28,6 +28,18 @@ export const MENU_ITEMS: MenuItemConfig[] = [
     },
   },
 
+  {
+    id: 'customers',
+    title: 'Customers',
+    showSubTabsBar: false,
+    defaultChild: {
+      localId: 'list',
+      title: 'Customers',
+      component: 'CustomersListWorkspace',
+      closable: false,
+    },
+  },
+
   // Temporary duplicates to test module tab ordering (open order vs menu order).
   ...Array.from({ length: 5 }, (_, i) => {
     const n = i + 1
