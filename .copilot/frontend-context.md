@@ -33,7 +33,10 @@ Clarification:
 Definition:
 
 - Virtual Tabs are internal application workspaces.
-- Each tab represents a dynamically created component instance.
+- The ERP uses a two-level tab hierarchy:
+  - Level 1: module tabs opened from the sidebar menu
+  - Level 2: workspace tabs opened within the active module
+- Each level-2 tab represents a dynamically created component instance.
 - Multiple instances of the same component with different parameters are allowed.
 
 State & lifecycle rules:

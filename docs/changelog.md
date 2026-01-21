@@ -11,3 +11,4 @@ All notable changes to frontend rules/behavior are documented here.
 - Implemented API/auth foundation: Pinia auth store + axios client + Bearer interceptor + 401 unauthorized event.
 - Added `/login` route + auth guard for `/app` and wired unauthorized redirect.
 - Added `VITE_AUTH_ENABLED` flag to disable auth enforcement during development.
+- Refactored Virtual Tabs into two levels: module tabs (menu) + workspace sub-tabs per module.

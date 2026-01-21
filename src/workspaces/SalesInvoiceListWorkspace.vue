@@ -9,8 +9,8 @@ const tabsStore = useTabsStore()
 const demoInvoices = ['INV-001', 'INV-002', 'INV-003']
 
 function openInvoice(invoiceId: string) {
-  const result = tabsStore.openTab({
-    id: `sales-invoice-${invoiceId}`,
+  const result = tabsStore.openChildTab({
+    localId: `invoice-${invoiceId}`,
     title: `Sales Invoice ${invoiceId}`,
     component: 'SalesInvoiceFormWorkspace',
     props: { invoiceId },

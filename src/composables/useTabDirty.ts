@@ -4,7 +4,7 @@ import { useTabsStore } from '../stores/tabs'
 export function useTabDirty(tabId: string) {
   const tabsStore = useTabsStore()
 
-  const dirty = computed(() => tabsStore.getTab(tabId)?.dirty ?? false)
+  const dirty = computed(() => tabsStore.getChildTab(tabId)?.dirty ?? false)
 
   function markDirty() {
     tabsStore.setDirty(tabId, true)

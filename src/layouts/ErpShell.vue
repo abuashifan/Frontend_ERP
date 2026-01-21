@@ -4,6 +4,7 @@ import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 
 import VirtualTabsBar from '../components/VirtualTabsBar.vue'
+import VirtualSubTabsBar from '../components/VirtualSubTabsBar.vue'
 import VirtualTabsHost from '../components/VirtualTabsHost.vue'
 import { useAuthStore } from '../stores/auth'
 import { useTabsStore } from '../stores/tabs'
@@ -12,9 +13,14 @@ import { AUTH_ENABLED } from '../config/auth'
 type MenuItem = {
   id: string
   title: string
-  component: string
-  props?: Record<string, unknown>
   closable?: boolean
+  defaultChild: {
+    localId: string
+    title: string
+    component: string
+    props?: Record<string, unknown>
+    closable?: boolean
+  }
 }
 
 const tabsStore = useTabsStore()
@@ -26,23 +32,38 @@ const menuItems = computed<MenuItem[]>(() => [
   {
     id: 'dashboard',
     title: 'Dashboard',
-    component: 'DashboardWorkspace',
     closable: false,
+    defaultChild: {
+      localId: 'home',
+      title: 'Dashboard',
+      component: 'DashboardWorkspace',
+      closable: false,
+    },
   },
   {
     id: 'sales-invoices',
     title: 'Sales Invoices',
-    component: 'SalesInvoiceListWorkspace',
+    defaultChild: {
+      localId: 'list',
+      title: 'Sales Invoices',
+      component: 'SalesInvoiceListWorkspace',
+      closable: false,
+    },
   },
 ])
 
 function openMenu(item: MenuItem) {
-  const result = tabsStore.openTab({
+  const result = tabsStore.openModule({
     id: item.id,
     title: item.title,
-    component: item.component,
-    props: item.props ?? {},
     closable: item.closable,
+    defaultChild: {
+      localId: item.defaultChild.localId,
+      title: item.defaultChild.title,
+      component: item.defaultChild.component,
+      props: item.defaultChild.props ?? {},
+      closable: item.defaultChild.closable,
+    },
   })
 
   if (!result.ok) {
@@ -50,7 +71,7 @@ function openMenu(item: MenuItem) {
   }
 }
 
-if (tabsStore.tabs.length === 0) {
+if (tabsStore.modules.length === 0) {
   const first = menuItems.value[0]
   if (first) openMenu(first)
 }
@@ -72,7 +93,7 @@ function logout() {
       >
         ERP
       </div>
-      <el-menu :default-active="tabsStore.activeTabId ?? undefined">
+      <el-menu :default-active="tabsStore.activeModuleId ?? undefined">
         <el-menu-item
           v-for="item in menuItems"
           :key="item.id"
@@ -95,6 +116,8 @@ function logout() {
       </el-header>
 
       <VirtualTabsBar />
+
+      <VirtualSubTabsBar />
 
       <el-main class="min-h-0 !p-0">
         <VirtualTabsHost />

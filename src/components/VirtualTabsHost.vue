@@ -6,7 +6,7 @@ import { MAX_OPEN_TABS } from '../config/tabs'
 
 const tabsStore = useTabsStore()
 
-const activeTab = computed(() => tabsStore.activeTab)
+const activeTab = computed(() => tabsStore.activeChildTab)
 
 const activeComponent = computed(() => {
   if (!activeTab.value) return null

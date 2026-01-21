@@ -7,23 +7,23 @@ import { useTabsStore } from '../stores/tabs'
 
 const tabsStore = useTabsStore()
 
-const tabs = computed(() => tabsStore.modules)
-const activeTabId = computed(() => tabsStore.activeModuleId)
+const moduleTab = computed(() => tabsStore.activeModule)
+const tabs = computed(() => moduleTab.value?.tabs ?? [])
+const activeTabId = computed(() => moduleTab.value?.activeChildTabId ?? null)
 
 function activate(id: string) {
-  tabsStore.activateModule(id)
+  tabsStore.activateChildTab(id)
 }
 
 async function attemptClose(id: string) {
-  const tab = tabsStore.getModule(id)
+  const tab = tabsStore.getChildTab(id)
   if (!tab) return
   if (!tab.closable) return
 
-  const hasDirtyChildren = tab.tabs.some((t) => t.dirty)
-  if (hasDirtyChildren) {
+  if (tab.dirty) {
     try {
       await ElMessageBox.confirm(
-        'Menu tab ini memiliki form yang belum disimpan. Tutup tetap?',
+        'Tab ini memiliki perubahan yang belum disimpan. Tutup tetap?',
         'Konfirmasi',
         {
           confirmButtonText: 'Tutup',
@@ -36,12 +36,13 @@ async function attemptClose(id: string) {
     }
   }
 
-  tabsStore.closeModule(id)
+  tabsStore.closeChildTab(id)
 }
 </script>
 
 <template>
   <div
+    v-if="moduleTab"
     class="flex gap-2 items-center px-3 py-2 overflow-x-auto border-b border-[var(--el-border-color-light)] bg-[var(--el-bg-color)]"
   >
     <div
@@ -57,7 +58,7 @@ async function attemptClose(id: string) {
     >
       <span class="text-sm">{{ tab.title }}</span>
       <span
-        v-if="tab.tabs.some((t) => t.dirty)"
+        v-if="tab.dirty"
         class="w-2 h-2 rounded-full bg-[var(--el-color-warning)]"
         title="Unsaved changes"
       />
