@@ -209,7 +209,7 @@ Last updated: 2026-01-21
 - Vendors list workspace wired to backend `GET /vendors`
 - Products list workspace wired to backend `GET /products`
 - Warehouses list workspace wired to backend `GET /warehouses`
-- Next: basic create/edit forms for master data (customers/vendors/products/warehouses)
+- Basic create/edit forms implemented for master data (customers/vendors/products/warehouses)
 
 [7.2] Accounting pages (dummy) — NOT STARTED
 

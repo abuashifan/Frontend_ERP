@@ -21,6 +21,18 @@ export type Vendor = {
   updated_at?: string
 }
 
+export type CreateVendorPayload = {
+  code: string
+  name: string
+  tax_id?: string | null
+  email?: string | null
+  phone?: string | null
+  address?: string | null
+  is_active?: boolean
+}
+
+export type UpdateVendorPayload = Partial<CreateVendorPayload>
+
 export async function listVendors(): Promise<Vendor[]> {
   const tenantStore = useTenantStore()
   if (!tenantStore.activeCompanyId) {
@@ -36,5 +48,24 @@ export async function listVendors(): Promise<Vendor[]> {
 
 export async function getVendor(id: number): Promise<Vendor> {
   const res: AxiosResponse<ApiEnvelope<Vendor>> = await api.get(`/vendors/${id}`)
+  return res.data.data
+}
+
+export async function createVendor(payload: CreateVendorPayload): Promise<Vendor> {
+  const tenantStore = useTenantStore()
+  if (!tenantStore.activeCompanyId) {
+    throw new Error('company_id belum diset. Set `VITE_COMPANY_ID` atau aktifkan tenant switcher.')
+  }
+
+  const companyId = Number(tenantStore.activeCompanyId)
+  const res: AxiosResponse<ApiEnvelope<Vendor>> = await api.post('/vendors', {
+    company_id: companyId,
+    ...payload,
+  })
+  return res.data.data
+}
+
+export async function updateVendor(id: number, payload: UpdateVendorPayload): Promise<Vendor> {
+  const res: AxiosResponse<ApiEnvelope<Vendor>> = await api.put(`/vendors/${id}`, payload)
   return res.data.data
 }

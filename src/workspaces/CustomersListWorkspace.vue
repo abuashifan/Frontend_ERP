@@ -3,8 +3,11 @@ import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import { listCustomers, type Customer } from '../lib/api/modules/customers'
+import { useTabsStore } from '../stores/tabs'
 
 defineProps<{ tabId: string }>()
+
+const tabsStore = useTabsStore()
 
 const loading = ref(false)
 const errorMessage = ref<string | null>(null)
@@ -26,6 +29,30 @@ async function load() {
   }
 }
 
+function openNew() {
+  const result = tabsStore.openChildTab({
+    localId: 'new',
+    title: 'New Customer',
+    component: 'CustomerFormWorkspace',
+    props: { mode: 'create' },
+    closable: true,
+  })
+
+  if (!result.ok) ElMessage.warning(result.message)
+}
+
+function openEdit(row: Customer) {
+  const result = tabsStore.openChildTab({
+    localId: `edit-${row.id}`,
+    title: `Edit Customer ${row.code}`,
+    component: 'CustomerFormWorkspace',
+    props: { mode: 'edit', customerId: row.id },
+    closable: true,
+  })
+
+  if (!result.ok) ElMessage.warning(result.message)
+}
+
 onMounted(() => {
   void load()
 })
@@ -39,6 +66,7 @@ onMounted(() => {
         <div class="text-sm text-[var(--el-text-color-secondary)]">Data diambil dari backend.</div>
       </div>
       <div class="flex items-center gap-2">
+        <el-button size="small" type="primary" @click="openNew">New</el-button>
         <el-button size="small" :loading="loading" @click="load">Refresh</el-button>
       </div>
     </div>
@@ -56,6 +84,7 @@ onMounted(() => {
       :data="rows"
       height="calc(100vh - 240px)"
       class="w-full"
+      @row-dblclick="openEdit"
     >
       <el-table-column prop="id" label="ID" width="90" />
       <el-table-column prop="code" label="Code" width="140" />
