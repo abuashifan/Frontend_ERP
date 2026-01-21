@@ -203,7 +203,7 @@ Last updated: 2026-01-21
 - Sales Invoice list workspace
 - Sales Invoice form workspace (dummy)
 
-[7.1] Master data pages (start real API integration) — IN PROGRESS (2026-01-21)
+[7.1] Master data pages (start real API integration) — COMPLETED (2026-01-21)
 
 - Customers list workspace wired to backend `GET /customers`
 - Vendors list workspace wired to backend `GET /vendors`
