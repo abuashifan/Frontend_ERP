@@ -178,7 +178,7 @@ Last updated: 2026-01-21
 - Tenant store persists active company id in `localStorage`
 
 
-[6.4] Tenant context UI — IN PROGRESS (2026-01-21)
+[6.4] Tenant context UI — COMPLETED (2026-01-21)
 
 - Default mode: single-company (set once via `VITE_COMPANY_ID` and persisted)
 - Optional company switcher UI can be enabled via `VITE_TENANT_SWITCHER_ENABLED=true`
