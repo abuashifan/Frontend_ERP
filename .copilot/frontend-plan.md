@@ -150,14 +150,14 @@ Last updated: 2026-01-21
 - DECIDED: Laravel Sanctum token-based auth (Bearer token)
 - Recorded in `docs/decisions.md` (ADR-0001)
 
-[6.1] Axios client — IN PROGRESS
+[6.1] Axios client — COMPLETED (2026-01-21)
 
-- Base URL from env
+- Base URL from `VITE_API_BASE_URL` with fallback
 
-[6.2] Interceptors — NOT STARTED
+[6.2] Interceptors — COMPLETED (2026-01-21)
 
-- Auth token/cookie handling
-- Global 401 handling
+- Inject `Authorization: Bearer <token>` from Pinia auth store
+- On HTTP 401: clear token and emit `auth:unauthorized` event
 
 [6.3] Multi-tenant header support — NOT STARTED
 

@@ -21,9 +21,13 @@ Decision:
 Consequences:
 
 - Axios interceptors must inject the Bearer token.
-- Token persistence strategy must be defined (store + storage).
+- Token persistence strategy: Pinia store backed by `localStorage`.
 - Logout must revoke token (if backend supports) and clear local token.
 - No CSRF cookie flow required for API requests (unlike Sanctum SPA cookie mode).
+
+Implementation notes:
+- Token is loaded on app boot.
+- On HTTP 401, token is cleared and a global `auth:unauthorized` event is emitted.
 
 ---
 

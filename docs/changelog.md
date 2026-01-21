@@ -8,3 +8,4 @@ All notable changes to frontend rules/behavior are documented here.
 - Added Tailwind + Element Plus baseline.
 - Implemented Virtual Tabs skeleton (Pinia registry + KeepAlive + dirty-close confirm).
 - DECIDED auth strategy: Laravel Sanctum token-based (Bearer token).
+- Implemented API/auth foundation: Pinia auth store + axios client + Bearer interceptor + 401 unauthorized event.
