@@ -11,6 +11,7 @@ import { useAuthStore } from './stores/auth'
 import { useTenantStore } from './stores/tenant'
 import { AUTH_UNAUTHORIZED_EVENT } from './lib/events'
 import { AUTH_ENABLED } from './config/auth'
+import { DEFAULT_COMPANY_ID } from './config/tenant'
 
 const app = createApp(App)
 app.use(pinia)
@@ -18,6 +19,12 @@ app.use(pinia)
 // Bootstrap persisted auth token early.
 useAuthStore().loadFromStorage()
 useTenantStore().loadFromStorage()
+
+// Single-company default: allow configuring company once via env.
+const tenantStore = useTenantStore()
+if (!tenantStore.activeCompanyId && DEFAULT_COMPANY_ID) {
+	tenantStore.setActiveCompanyId(DEFAULT_COMPANY_ID)
+}
 
 app.use(router)
 app.use(ElementPlus)

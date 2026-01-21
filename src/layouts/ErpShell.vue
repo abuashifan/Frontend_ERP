@@ -10,6 +10,8 @@ import TenantSwitcher from '../components/TenantSwitcher.vue'
 import { useAuthStore } from '../stores/auth'
 import { useTabsStore } from '../stores/tabs'
 import { AUTH_ENABLED } from '../config/auth'
+import { TENANT_SWITCHER_ENABLED } from '../config/tenant'
+import { useTenantStore } from '../stores/tenant'
 
 type MenuItem = {
   id: string
@@ -27,8 +29,10 @@ type MenuItem = {
 
 const tabsStore = useTabsStore()
 const authStore = useAuthStore()
+const tenantStore = useTenantStore()
 const router = useRouter()
 const authEnabled = AUTH_ENABLED
+const tenantSwitcherEnabled = TENANT_SWITCHER_ENABLED
 
 const menuItems = computed<MenuItem[]>(() => [
   {
@@ -122,7 +126,11 @@ function logout() {
       >
         <div>Backend: Laravel API</div>
         <div class="flex items-center gap-2">
-          <TenantSwitcher />
+          <TenantSwitcher v-if="tenantSwitcherEnabled" />
+          <el-tag v-else-if="tenantStore.activeCompanyId" size="small" type="info">
+            Company: {{ tenantStore.activeCompanyId }}
+          </el-tag>
+          <el-tag v-else size="small" type="warning">No company</el-tag>
           <el-button v-if="authEnabled" size="small" @click="logout">Logout</el-button>
         </div>
       </el-header>

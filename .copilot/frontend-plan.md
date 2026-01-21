@@ -180,8 +180,9 @@ Last updated: 2026-01-21
 
 [6.4] Tenant context UI — IN PROGRESS (2026-01-21)
 
-- Implemented manual company selector (sets persisted `activeCompanyId`)
-- On change, app resets virtual tabs to avoid cross-tenant state leakage
+- Default mode: single-company (set once via `VITE_COMPANY_ID` and persisted)
+- Optional company switcher UI can be enabled via `VITE_TENANT_SWITCHER_ENABLED=true`
+- Switching company resets virtual tabs to avoid cross-tenant state leakage
 - Next: replace manual input with company dropdown from backend endpoint (if/when added)
 
 ---

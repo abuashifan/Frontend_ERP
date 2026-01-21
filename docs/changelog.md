@@ -15,3 +15,4 @@ All notable changes to frontend rules/behavior are documented here.
 - Hide sub-tab bar for modules that don't need child tabs (e.g., Dashboard).
 - Implement multi-tenant header injection (`X-Company-Id`) via axios + tenant store (no UI yet).
 - Add initial tenant context UI (manual Company ID input) and reset tabs when switching.
+- Default to single-company mode via `VITE_COMPANY_ID`; company switcher UI is optional (`VITE_TENANT_SWITCHER_ENABLED`).

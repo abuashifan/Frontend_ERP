@@ -33,7 +33,7 @@ Implementation notes:
 
 ## ADR-0002 — Tenant context strategy (TBD)
 
-Status: TBD
+Status: DECIDED (2026-01-21)
 
 Context:
 
@@ -41,8 +41,12 @@ Context:
 
 Decision:
 
-- TBD
+- Default mode is **single-company per app deployment**.
+- `X-Company-Id` is injected on every request from a persisted tenant store.
+- `company_id` can be configured once via env (`VITE_COMPANY_ID`) and stored locally.
+- A company-switcher UI is optional and disabled by default; it may be enabled later for a branch system.
 
 Consequences:
 
-- Determines how we store active company and inject tenant headers.
+- Frontend must reset tab state when switching company to avoid cross-tenant state leakage.
+- Most users will never change tenant; switching is an admin/dev-only capability for now.
