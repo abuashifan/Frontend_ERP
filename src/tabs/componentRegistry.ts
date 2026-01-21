@@ -3,6 +3,7 @@ import type { Component } from 'vue'
 
 export const tabComponentRegistry: Record<string, Component> = {
   DashboardWorkspace: defineAsyncComponent(() => import('../workspaces/DashboardWorkspace.vue')),
+  PlaceholderWorkspace: defineAsyncComponent(() => import('../workspaces/PlaceholderWorkspace.vue')),
   CustomersListWorkspace: defineAsyncComponent(() => import('../workspaces/CustomersListWorkspace.vue')),
   CustomerFormWorkspace: defineAsyncComponent(() => import('../workspaces/CustomerFormWorkspace.vue')),
   VendorsListWorkspace: defineAsyncComponent(() => import('../workspaces/VendorsListWorkspace.vue')),

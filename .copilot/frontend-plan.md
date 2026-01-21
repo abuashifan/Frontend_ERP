@@ -215,6 +215,16 @@ Last updated: 2026-01-21
 
 - COA, Journal list/form/detail (read-only)
 
+[7.3] Sidebar menu (final structure) — IN PROGRESS (2026-01-21)
+
+- Show all modules/menu items that will be used in the ERP
+- Menu items can point to placeholder workspaces until implemented
+
+[7.4] Form workspaces (next modules) — NOT STARTED
+
+- Add basic create/edit forms for non-master-data modules (AP/AR/Inventory/Accounting)
+- Must follow Virtual Tabs rules (open list + form/detail as sub-tabs)
+
 ---
 
 ## PHASE 8 — DASHBOARD

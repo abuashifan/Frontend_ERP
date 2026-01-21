@@ -77,6 +77,54 @@ export const MENU_ITEMS: MenuItemConfig[] = [
   },
 
   {
+    id: 'coa',
+    title: 'Chart of Accounts',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Chart of Accounts',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Chart of Accounts',
+        description: 'Planned: COA list/detail (read-only) for Phase 7.2.',
+      },
+      closable: false,
+    },
+  },
+
+  {
+    id: 'journals',
+    title: 'Journals',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Journals',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Journals',
+        description: 'Planned: journal list/detail/form (read-only) for Phase 7.2.',
+      },
+      closable: false,
+    },
+  },
+
+  {
+    id: 'accounting-periods',
+    title: 'Accounting Periods',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Accounting Periods',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Accounting Periods',
+        description: 'Planned: period list + close/open actions (later).',
+      },
+      closable: false,
+    },
+  },
+
+  {
     id: 'sales-invoices',
     title: 'Sales Invoices',
     showSubTabsBar: true,
@@ -84,6 +132,182 @@ export const MENU_ITEMS: MenuItemConfig[] = [
       localId: 'list',
       title: 'Sales Invoices',
       component: 'SalesInvoiceListWorkspace',
+      closable: false,
+    },
+  },
+
+  {
+    id: 'customer-payments',
+    title: 'Customer Payments',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Customer Payments',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Customer Payments',
+        description: 'Planned: list + create/edit/post (Phase 7.4+).',
+      },
+      closable: false,
+    },
+  },
+
+  {
+    id: 'sales-returns',
+    title: 'Sales Returns',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Sales Returns',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Sales Returns',
+        description: 'Planned: return list + form (Phase 7.4+).',
+      },
+      closable: false,
+    },
+  },
+
+  {
+    id: 'purchase-orders',
+    title: 'Purchase Orders',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Purchase Orders',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Purchase Orders',
+        description: 'Planned: PO list + form + approve/cancel (Phase 7.4+).',
+      },
+      closable: false,
+    },
+  },
+
+  {
+    id: 'vendor-invoices',
+    title: 'Vendor Invoices',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Vendor Invoices',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Vendor Invoices',
+        description: 'Planned: invoice list + form + approve/post (Phase 7.4+).',
+      },
+      closable: false,
+    },
+  },
+
+  {
+    id: 'vendor-payments',
+    title: 'Vendor Payments',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Vendor Payments',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Vendor Payments',
+        description: 'Planned: payment list + form + approve/post (Phase 7.4+).',
+      },
+      closable: false,
+    },
+  },
+
+  {
+    id: 'purchase-returns',
+    title: 'Purchase Returns',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Purchase Returns',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Purchase Returns',
+        description: 'Planned: return list + form (Phase 7.4+).',
+      },
+      closable: false,
+    },
+  },
+
+  {
+    id: 'inventory-movements',
+    title: 'Inventory Movements',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Inventory Movements',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Inventory Movements',
+        description: 'Planned: stock in/out list + form + post (Phase 7.4+).',
+      },
+      closable: false,
+    },
+  },
+
+  {
+    id: 'inventory-receivings',
+    title: 'Inventory Receivings',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Inventory Receivings',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Inventory Receivings',
+        description: 'Planned: receiving list + form + post (Phase 7.4+).',
+      },
+      closable: false,
+    },
+  },
+
+  {
+    id: 'warehouse-transfers',
+    title: 'Warehouse Transfers',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Warehouse Transfers',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Warehouse Transfers',
+        description: 'Planned: transfer list + form + approve/post (Phase 7.4+).',
+      },
+      closable: false,
+    },
+  },
+
+  {
+    id: 'reports',
+    title: 'Reports',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'home',
+      title: 'Reports',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Reports',
+        description: 'Planned: Trial Balance, P&L, Balance Sheet, Budget reports.',
+      },
+      closable: false,
+    },
+  },
+
+  {
+    id: 'admin-settings',
+    title: 'Admin Settings',
+    showSubTabsBar: false,
+    defaultChild: {
+      localId: 'settings',
+      title: 'Admin Settings',
+      component: 'PlaceholderWorkspace',
+      props: {
+        title: 'Admin Settings',
+        description: 'Planned: settings UI for budget control and system flags.',
+      },
       closable: false,
     },
   },
