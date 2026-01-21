@@ -6,5 +6,5 @@ function parseBooleanEnv(value: unknown, defaultValue: boolean): boolean {
   return defaultValue
 }
 
-// Dev convenience: default disabled unless explicitly enabled.
-export const AUTH_ENABLED = parseBooleanEnv(import.meta.env.VITE_AUTH_ENABLED, false)
+// Default enabled; can be disabled explicitly for local UI work.
+export const AUTH_ENABLED = parseBooleanEnv(import.meta.env.VITE_AUTH_ENABLED, true)

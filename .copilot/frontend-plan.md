@@ -143,6 +143,7 @@ Last updated: 2026-01-21
 
 - Added `/login` and protected `/app`
 - Router guards enforce authentication without controlling virtual tab lifecycle
+- Added `/setup/company` route for one-time initial company initialization
 
 [5.3] Optional URL sync (query only) — NOT STARTED
 
@@ -157,11 +158,11 @@ Last updated: 2026-01-21
 - DECIDED: Laravel Sanctum token-based auth (Bearer token)
 - Recorded in `docs/decisions.md` (ADR-0001)
 
-[6.0A] Backend auth endpoint contract (login/token issuance) — NOT STARTED
+[6.0A] Backend auth endpoint contract (login/token issuance) — COMPLETED (2026-01-21)
 
-- Current backend has no public `/login` or token-issuance endpoint exposed in routes.
-- Frontend currently uses “paste token” login.
-- If/when we want username/password login, define endpoint(s) + payload/response and implement in backend.
+- Implemented `POST /api/auth/login` to issue Sanctum bearer token
+- Implemented `POST /api/auth/logout` + `GET /api/auth/me`
+- Frontend login now uses email/password (Breeze-like flow) instead of paste-token
 
 [6.1] Axios client — COMPLETED (2026-01-21)
 
@@ -185,6 +186,12 @@ Last updated: 2026-01-21
 - Optional company switcher UI can be enabled via `VITE_TENANT_SWITCHER_ENABLED=true`
 - Switching company resets virtual tabs to avoid cross-tenant state leakage
 - Next: replace manual input with company dropdown from backend endpoint (if/when added)
+
+[6.5] Initial company setup (single-company) — COMPLETED (2026-01-21)
+
+- `GET /api/system/bootstrap` returns `setupRequired` + `singleCompanyId`
+- `POST /api/system/setup/company` creates the first company and binds `system.single_company_id`
+- App boot redirects to `/setup/company` when no company exists
 
 ---
 

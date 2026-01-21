@@ -75,10 +75,16 @@ Form safety:
 - Multi-tenant header injection (`X-Company-Id`) is implemented via axios interceptor.
 - Tenant selection UI is still pending; active company id is stored in Pinia + `localStorage`.
 
+Initial company setup (single-company mode):
+
+- App calls `GET /api/system/bootstrap` on shell mount
+- If `setupRequired=true`, app redirects to `/setup/company`
+- Setup creates the first company and binds `system.single_company_id` in backend settings
+
 Auth endpoint note (current state):
 
-- Backend routes do not expose a public username/password login endpoint or token issuance endpoint.
-- Current frontend login is intentionally “paste token” (Sanctum bearer token) until a backend auth contract is defined.
+- Backend exposes `POST /api/auth/login` (email/password → Sanctum bearer token)
+- Frontend login is Breeze-like (email/password) and stores bearer token locally
 
 ## Decisions (Must Be Explicit)
 

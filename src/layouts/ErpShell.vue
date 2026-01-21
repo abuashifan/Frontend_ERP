@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue'
+import { computed, onMounted, watchEffect } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 
@@ -13,6 +13,7 @@ import { AUTH_ENABLED } from '../config/auth'
 import { TENANT_SWITCHER_ENABLED } from '../config/tenant'
 import { useTenantStore } from '../stores/tenant'
 import { MENU_ITEMS, type MenuItemConfig } from '../config/menu'
+import { getBootstrap } from '../lib/api/modules/system'
 
 const tabsStore = useTabsStore()
 const authStore = useAuthStore()
@@ -53,6 +54,24 @@ function logout() {
   authStore.clear()
   router.replace('/login')
 }
+
+onMounted(async () => {
+  try {
+    const bootstrap = await getBootstrap()
+
+    if (bootstrap.data.singleCompanyId && !tenantStore.activeCompanyId) {
+      tenantStore.setActiveCompanyId(String(bootstrap.data.singleCompanyId))
+    }
+
+    if (bootstrap.data.setupRequired) {
+      router.replace('/setup/company')
+    }
+  } catch (e) {
+    // If auth is disabled in the frontend but backend still requires a token,
+    // this request may fail. Keep UX graceful.
+    console.error(e)
+  }
+})
 </script>
 
 <template>

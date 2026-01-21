@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import ErpShell from '../layouts/ErpShell.vue'
 import LoginView from '../views/LoginView.vue'
+import SetupCompanyView from '../views/SetupCompanyView.vue'
 
 import { useAuthStore } from '../stores/auth'
 import { AUTH_ENABLED } from '../config/auth'
@@ -15,6 +16,11 @@ export const router = createRouter({
       name: 'login',
       component: LoginView,
       meta: { public: true },
+    },
+    {
+      path: '/setup/company',
+      name: 'setup-company',
+      component: SetupCompanyView,
     },
     {
       path: '/app',
