@@ -231,6 +231,14 @@ Last updated: 2026-01-21
 
 [8.1] Dashboard workspace — COMPLETED
 
+[8.2] Navigation regrouping (reduce sidebar length) — NOT STARTED
+
+- Goal: make sidebar simpler by grouping modules by type (e.g. Master Data, Sales, Purchasing, Inventory, Accounting, Reports, Admin)
+- Allowed UI approaches (choose one when implementing):
+	- Nested sidebar menu (collapsible groups)
+	- Dashboard-style module launcher tiles (similar to screenshot) and keep sidebar minimal
+- Constraint: must not break Virtual Tabs rules (menu launches/activates module tabs; router does not drive tab lifecycle)
+
 ---
 
 ## PHASE 9 — PERMISSIONS & ACCESS CONTROL
