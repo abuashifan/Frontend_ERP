@@ -18,14 +18,12 @@ const activeProps = computed(() => activeTab.value?.props ?? {})
 
 <template>
   <div class="virtual-tabs-host">
-    <div v-if="!activeTab" class="empty">
-      Pilih menu untuk membuka workspace.
-    </div>
+    <div v-if="!activeTab" class="empty">Pilih menu untuk membuka workspace.</div>
 
     <KeepAlive :max="MAX_OPEN_TABS">
       <component
-        v-if="activeTab && activeComponent"
         :is="activeComponent"
+        v-if="activeTab && activeComponent"
         :key="activeTab.id"
         v-bind="activeProps"
         :tab-id="activeTab.id"
