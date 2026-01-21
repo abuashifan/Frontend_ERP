@@ -105,7 +105,11 @@ When a decision changes, record it in `docs/decisions.md` and add an entry to `d
 ## Implementation Notes (Current)
 
 - Stack: Vue 3 + Vite + TS, Pinia, Vue Router (limited), Element Plus (components), Tailwind (styling).
-- Virtual tab skeleton implemented (Tab store + KeepAlive host + close confirm).
+- Virtual Tabs implemented as a two-level system:
+  - Level 1 module tabs (sidebar)
+  - Level 2 workspace tabs within a module
+- KeepAlive is bounded and protected with an explicit LRU eviction strategy (never auto-evict dirty tabs).
+- Auth guard exists but can be disabled for dev via `VITE_AUTH_ENABLED=false`.
 
 Styling rule (maintenance):
 

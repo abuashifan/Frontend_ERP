@@ -23,9 +23,10 @@ Last updated: 2026-01-21
 
 - Vue 3 + Vite + TypeScript scaffolded
 
-[0.3] Environment variables — IN PROGRESS
+[0.3] Environment variables — COMPLETED (2026-01-21)
 
 - `VITE_API_BASE_URL`
+- `VITE_AUTH_ENABLED` (dev convenience)
 
 [0.3A] Documentation & tracking baseline — COMPLETED
 
@@ -66,7 +67,7 @@ Last updated: 2026-01-21
 
 ## PHASE 2 — SIDEBAR MENU SYSTEM
 
-[2.1] Static menu configuration — IN PROGRESS
+[2.1] Static menu configuration — COMPLETED
 
 - Render menu from config
 - Menu click opens/activates virtual tab
@@ -76,39 +77,44 @@ Last updated: 2026-01-21
 
 ---
 
-## PHASE 3 — VIRTUAL TAB SYSTEM (CORE)
+## PHASE 3 — VIRTUAL TAB SYSTEM (TWO-LEVEL)
 
-[3.1] Tab registry store in Pinia — COMPLETED
+[3.1] Tab registry store in Pinia — COMPLETED (2026-01-21)
 
-- `tabs[]`, `activeTabId`
-- `openTab`, `closeTab`, `activateTab`
-- Enforce unique tab ID
+- Level 1: module tabs (`modules[]`, `activeModuleId`)
+- Level 2: workspace tabs per module (`module.tabs[]`, `activeChildTabId`)
+- Enforce unique IDs (module `id`, child `${moduleId}::${localId}`)
 
-[3.2] Tab UI — COMPLETED
+[3.2] Module tab UI (Level 1 bar) — COMPLETED
 
-- Tab bar list, active highlight, close button, overflow scroll
+- List, active highlight, close button, overflow scroll
+- Dirty indicator if any child tabs are dirty
 
-[3.3] Tab content host — COMPLETED
+[3.3] Workspace tab UI (Level 2 bar) — COMPLETED
 
-- Dynamic component rendering
+- Child tab strip for active module
+- Can be hidden per-module (`showSubTabsBar: false`)
+
+[3.4] Tab content host — COMPLETED
+
+- Dynamic component rendering from a component registry
 - `<KeepAlive>` preserves instances
-- Empty state
+- Empty state and missing-registry state
 
-[3.4] Tab rules hardening — IN PROGRESS
+[3.5] Rules hardening — COMPLETED
 
-- Auto-select next tab on close
+- Auto-select next tab on close (module and child)
 - Prevent closing non-closable tabs
+- Confirm close when dirty (child), confirm module close if any dirty children
 
-[3.5] KeepAlive cache policy — NOT STARTED
+[3.6] KeepAlive cache policy (bounded) — COMPLETED (2026-01-21)
 
-- Prevent unbounded memory usage
-- Define max open tabs and/or eviction strategy
-- Define how to handle "reopen" after eviction (fresh state vs restore)
-
-[3.5] KeepAlive cache policy — COMPLETED (2026-01-21)
-
-- Implemented max open tab cap + explicit LRU eviction (never auto-evict dirty tabs)
+- Max open child tabs cap + explicit LRU eviction (never auto-evict dirty tabs)
 - Bound KeepAlive cache via `<KeepAlive :max>`
+
+[3.7] Per-module UX flags — COMPLETED (2026-01-21)
+
+- `showSubTabsBar` controls whether the Level-2 bar renders for that module
 
 ---
 
@@ -120,9 +126,9 @@ Last updated: 2026-01-21
 
 [4.2] Close confirmation when dirty — COMPLETED
 
-[4.3] Standardized dirty contract — IN PROGRESS
+[4.3] Standardized dirty contract — COMPLETED
 
-- Establish a consistent pattern for workspaces/forms to report dirty/saved
+- Workspaces receive `tabId` and use the `useTabDirty(tabId)` helper
 
 ---
 
@@ -179,6 +185,12 @@ Last updated: 2026-01-21
 
 ## PHASE 7 — CORE PAGES (DUMMY FIRST)
 
+[7.0] Example workspaces (to prove Virtual Tabs rules) — COMPLETED
+
+- Dashboard workspace
+- Sales Invoice list workspace
+- Sales Invoice form workspace (dummy)
+
 [7.1] Master data dummy pages — NOT STARTED
 
 - Customer/Vendor/Product list + forms (dummy)
@@ -191,7 +203,7 @@ Last updated: 2026-01-21
 
 ## PHASE 8 — DASHBOARD
 
-[8.1] Dashboard workspace — NOT STARTED
+[8.1] Dashboard workspace — COMPLETED
 
 ---
 
@@ -208,9 +220,10 @@ Last updated: 2026-01-21
 
 [10.1] Loading/toast/empty states — NOT STARTED
 
-[10.2] KeepAlive memory strategy — NOT STARTED
+[10.2] Bundle size & code-splitting — NOT STARTED
 
-- Avoid unbounded cache growth
+- Reduce initial JS size (dynamic imports/manual chunks)
+- Keep tab components lazy-loadable without breaking KeepAlive identity
 
 ---
 
