@@ -206,7 +206,10 @@ Last updated: 2026-01-21
 [7.1] Master data pages (start real API integration) — IN PROGRESS (2026-01-21)
 
 - Customers list workspace wired to backend `GET /customers`
-- Next: add vendor/product list + basic create/edit forms
+- Vendors list workspace wired to backend `GET /vendors`
+- Products list workspace wired to backend `GET /products`
+- Warehouses list workspace wired to backend `GET /warehouses`
+- Next: basic create/edit forms for master data (customers/vendors/products/warehouses)
 
 [7.2] Accounting pages (dummy) — NOT STARTED
 

@@ -119,6 +119,7 @@ When a decision changes, record it in `docs/decisions.md` and add an entry to `d
 - KeepAlive is bounded and protected with an explicit LRU eviction strategy (never auto-evict dirty tabs).
 - Auth is enabled by default (`VITE_AUTH_ENABLED=true` in `.env.example`) but can be disabled for dev via `VITE_AUTH_ENABLED=false`.
 - `/setup/company` is treated as a public route so initial provisioning can be completed even when auth is enabled.
+- Master data list workspaces are wired to backend APIs: Customers, Vendors, Products, Warehouses.
 
 Styling rule (maintenance):
 

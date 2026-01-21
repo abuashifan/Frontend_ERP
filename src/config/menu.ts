@@ -40,21 +40,51 @@ export const MENU_ITEMS: MenuItemConfig[] = [
     },
   },
 
-  // Temporary duplicates to test module tab ordering (open order vs menu order).
-  ...Array.from({ length: 5 }, (_, i) => {
-    const n = i + 1
-    const title = n === 1 ? 'Sales Invoices' : `Sales Invoices (${n})`
+  {
+    id: 'vendors',
+    title: 'Vendors',
+    showSubTabsBar: false,
+    defaultChild: {
+      localId: 'list',
+      title: 'Vendors',
+      component: 'VendorsListWorkspace',
+      closable: false,
+    },
+  },
 
-    return {
-      id: `sales-invoices-${n}`,
-      title,
-      showSubTabsBar: true,
-      defaultChild: {
-        localId: 'list',
-        title,
-        component: 'SalesInvoiceListWorkspace',
-        closable: false,
-      },
-    } satisfies MenuItemConfig
-  }),
+  {
+    id: 'products',
+    title: 'Products',
+    showSubTabsBar: false,
+    defaultChild: {
+      localId: 'list',
+      title: 'Products',
+      component: 'ProductsListWorkspace',
+      closable: false,
+    },
+  },
+
+  {
+    id: 'warehouses',
+    title: 'Warehouses',
+    showSubTabsBar: false,
+    defaultChild: {
+      localId: 'list',
+      title: 'Warehouses',
+      component: 'WarehousesListWorkspace',
+      closable: false,
+    },
+  },
+
+  {
+    id: 'sales-invoices',
+    title: 'Sales Invoices',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Sales Invoices',
+      component: 'SalesInvoiceListWorkspace',
+      closable: false,
+    },
+  },
 ]
