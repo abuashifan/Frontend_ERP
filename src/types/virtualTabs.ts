@@ -24,6 +24,7 @@ export type ModuleTab = {
   id: ModuleTabId
   title: string
   closable: boolean
+  showSubTabsBar: boolean
   openedAt: number
   lastAccessedAt: number
 
@@ -35,6 +36,7 @@ export type OpenModulePayload = {
   id: ModuleTabId
   title: string
   closable?: boolean
+  showSubTabsBar?: boolean
   defaultChild: OpenChildTabPayload
 }
 

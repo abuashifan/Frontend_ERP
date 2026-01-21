@@ -42,7 +42,7 @@ async function attemptClose(id: string) {
 
 <template>
   <div
-    v-if="moduleTab"
+    v-if="moduleTab && moduleTab.showSubTabsBar"
     class="flex gap-2 items-center px-3 py-2 overflow-x-auto border-b border-[var(--el-border-color-light)] bg-[var(--el-bg-color)]"
   >
     <div

@@ -12,3 +12,4 @@ All notable changes to frontend rules/behavior are documented here.
 - Added `/login` route + auth guard for `/app` and wired unauthorized redirect.
 - Added `VITE_AUTH_ENABLED` flag to disable auth enforcement during development.
 - Refactored Virtual Tabs into two levels: module tabs (menu) + workspace sub-tabs per module.
+- Hide sub-tab bar for modules that don't need child tabs (e.g., Dashboard).

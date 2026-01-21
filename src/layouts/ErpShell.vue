@@ -14,6 +14,7 @@ type MenuItem = {
   id: string
   title: string
   closable?: boolean
+  showSubTabsBar?: boolean
   defaultChild: {
     localId: string
     title: string
@@ -33,6 +34,7 @@ const menuItems = computed<MenuItem[]>(() => [
     id: 'dashboard',
     title: 'Dashboard',
     closable: false,
+    showSubTabsBar: false,
     defaultChild: {
       localId: 'home',
       title: 'Dashboard',
@@ -43,6 +45,7 @@ const menuItems = computed<MenuItem[]>(() => [
   {
     id: 'sales-invoices',
     title: 'Sales Invoices',
+    showSubTabsBar: true,
     defaultChild: {
       localId: 'list',
       title: 'Sales Invoices',
@@ -57,6 +60,7 @@ function openMenu(item: MenuItem) {
     id: item.id,
     title: item.title,
     closable: item.closable,
+    showSubTabsBar: item.showSubTabsBar,
     defaultChild: {
       localId: item.defaultChild.localId,
       title: item.defaultChild.title,

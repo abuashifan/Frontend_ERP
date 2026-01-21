@@ -98,6 +98,7 @@ export const useTabsStore = defineStore('tabs', {
         id: payload.id,
         title: payload.title,
         closable: payload.closable ?? true,
+        showSubTabsBar: payload.showSubTabsBar ?? true,
         openedAt: now,
         lastAccessedAt: now,
         tabs: [],
