@@ -71,6 +71,11 @@ Form safety:
 - Backend is Laravel API (headless).
 - Frontend should be prepared for multi-tenant header usage (`X-Company-Id`) on API calls.
 
+Auth endpoint note (current state):
+
+- Backend routes do not expose a public username/password login endpoint or token issuance endpoint.
+- Current frontend login is intentionally “paste token” (Sanctum bearer token) until a backend auth contract is defined.
+
 ## Decisions (Must Be Explicit)
 
 These decisions affect architecture and must be recorded before implementing dependent features:

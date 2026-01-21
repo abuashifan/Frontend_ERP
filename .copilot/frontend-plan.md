@@ -150,6 +150,12 @@ Last updated: 2026-01-21
 - DECIDED: Laravel Sanctum token-based auth (Bearer token)
 - Recorded in `docs/decisions.md` (ADR-0001)
 
+[6.0A] Backend auth endpoint contract (login/token issuance) — NOT STARTED
+
+- Current backend has no public `/login` or token-issuance endpoint exposed in routes.
+- Frontend currently uses “paste token” login.
+- If/when we want username/password login, define endpoint(s) + payload/response and implement in backend.
+
 [6.1] Axios client — COMPLETED (2026-01-21)
 
 - Base URL from `VITE_API_BASE_URL` with fallback
