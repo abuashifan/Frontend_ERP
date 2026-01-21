@@ -9,3 +9,4 @@ All notable changes to frontend rules/behavior are documented here.
 - Implemented Virtual Tabs skeleton (Pinia registry + KeepAlive + dirty-close confirm).
 - DECIDED auth strategy: Laravel Sanctum token-based (Bearer token).
 - Implemented API/auth foundation: Pinia auth store + axios client + Bearer interceptor + 401 unauthorized event.
+- Added `/login` route + auth guard for `/app` and wired unauthorized redirect.

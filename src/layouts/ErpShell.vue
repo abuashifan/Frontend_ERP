@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
 
 import VirtualTabsBar from '../components/VirtualTabsBar.vue'
 import VirtualTabsHost from '../components/VirtualTabsHost.vue'
+import { useAuthStore } from '../stores/auth'
 import { useTabsStore } from '../stores/tabs'
 
 type MenuItem = {
@@ -15,6 +17,8 @@ type MenuItem = {
 }
 
 const tabsStore = useTabsStore()
+const authStore = useAuthStore()
+const router = useRouter()
 
 const menuItems = computed<MenuItem[]>(() => [
   {
@@ -48,6 +52,11 @@ if (tabsStore.tabs.length === 0) {
   const first = menuItems.value[0]
   if (first) openMenu(first)
 }
+
+function logout() {
+  authStore.clear()
+  router.replace('/login')
+}
 </script>
 
 <template>
@@ -69,6 +78,9 @@ if (tabsStore.tabs.length === 0) {
     <el-container class="main">
       <el-header class="header">
         <div class="header-left">Backend: Laravel API</div>
+        <div class="header-right">
+          <el-button size="small" @click="logout">Logout</el-button>
+        </div>
       </el-header>
 
       <VirtualTabsBar />
@@ -104,6 +116,14 @@ if (tabsStore.tabs.length === 0) {
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--el-border-color-light);
+  justify-content: space-between;
+  padding: 0 12px;
+}
+
+.header-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .content {

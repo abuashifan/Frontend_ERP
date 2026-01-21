@@ -132,10 +132,10 @@ Last updated: 2026-01-21
 
 - Router used only for high-level shell
 
-[5.2] Auth routes & guards — NOT STARTED
+[5.2] Auth routes & guards — COMPLETED (2026-01-21)
 
-- `/login`, `/app`
-- Guards must not control tab lifecycle
+- Added `/login` and protected `/app`
+- Router guards enforce authentication without controlling virtual tab lifecycle
 
 [5.3] Optional URL sync (query only) — NOT STARTED
 
