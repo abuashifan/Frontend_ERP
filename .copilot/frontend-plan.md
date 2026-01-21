@@ -70,6 +70,7 @@ Last updated: 2026-01-21
 [2.1] Static menu configuration — COMPLETED
 
 - Render menu from config
+- Sidebar menu config lives in `src/config/menu.ts`
 - Menu click opens/activates virtual tab
 - Menu does not router-navigate
 

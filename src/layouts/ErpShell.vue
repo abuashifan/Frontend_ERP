@@ -12,20 +12,7 @@ import { useTabsStore } from '../stores/tabs'
 import { AUTH_ENABLED } from '../config/auth'
 import { TENANT_SWITCHER_ENABLED } from '../config/tenant'
 import { useTenantStore } from '../stores/tenant'
-
-type MenuItem = {
-  id: string
-  title: string
-  closable?: boolean
-  showSubTabsBar?: boolean
-  defaultChild: {
-    localId: string
-    title: string
-    component: string
-    props?: Record<string, unknown>
-    closable?: boolean
-  }
-}
+import { MENU_ITEMS, type MenuItemConfig } from '../config/menu'
 
 const tabsStore = useTabsStore()
 const authStore = useAuthStore()
@@ -34,38 +21,9 @@ const router = useRouter()
 const authEnabled = AUTH_ENABLED
 const tenantSwitcherEnabled = TENANT_SWITCHER_ENABLED
 
-const menuItems = computed<MenuItem[]>(() => [
-  {
-    id: 'dashboard',
-    title: 'Dashboard',
-    closable: false,
-    showSubTabsBar: false,
-    defaultChild: {
-      localId: 'home',
-      title: 'Dashboard',
-      component: 'DashboardWorkspace',
-      closable: false,
-    },
-  },
-  ...Array.from({ length: 5 }, (_, i) => {
-    const n = i + 1
-    const title = n === 1 ? 'Sales Invoices' : `Sales Invoices (${n})`
+const menuItems = computed<MenuItemConfig[]>(() => MENU_ITEMS)
 
-    return {
-      id: `sales-invoices-${n}`,
-      title,
-      showSubTabsBar: true,
-      defaultChild: {
-        localId: 'list',
-        title,
-        component: 'SalesInvoiceListWorkspace',
-        closable: false,
-      },
-    } satisfies MenuItem
-  }),
-])
-
-function openMenu(item: MenuItem) {
+function openMenu(item: MenuItemConfig) {
   const result = tabsStore.openModule({
     id: item.id,
     title: item.title,
