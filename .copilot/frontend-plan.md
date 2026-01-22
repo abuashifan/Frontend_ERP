@@ -243,6 +243,14 @@ Catatan tertunda (setelah desain form Sales Invoice final):
 - [ ] Sales Invoice — Persist invoice-level discount via `POST /ar/invoices/{salesInvoice}/charges` (requires `account_code`) — NOT STARTED
 - [ ] Sales Invoice — Backend: hilangkan field/validasi `lines.*.description` (UI sudah disembunyikan; sekarang diisi otomatis dari product) — NOT STARTED
 
+Persiapan modul tab Sales Invoice (template untuk form lain):
+
+- [x] Sales Invoice — Tambah tab UI: Rincian Data / Uang Muka / Informasi / Biaya Lainnya / Dokumen (placeholder) — COMPLETED (2026-01-22)
+- [ ] Sales Invoice — Uang Muka tab: integrasi uang muka penjualan (opsi: Customer Payment unallocated / Down Payment) — NOT STARTED
+- [ ] Sales Invoice — Biaya Lainnya tab: integrasi charges via `/api/ar/invoices/{salesInvoice}/charges` (list + add + delete) — NOT STARTED
+- [ ] Sales Invoice — Informasi tab: definisi field tambahan + simpan ke backend (butuh perubahan schema/API) — NOT STARTED
+- [ ] Sales Invoice — Dokumen tab: attachment upload/list (butuh endpoint & storage di backend) — NOT STARTED
+
 ---
 
 ## PHASE 8 — DASHBOARD

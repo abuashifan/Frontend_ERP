@@ -30,6 +30,8 @@ const products = ref<Product[]>([])
 const notes = ref('')
 const discountAmount = ref<string>('')
 
+const activeSectionTab = ref<'detail' | 'down_payment' | 'info' | 'charges' | 'docs'>('detail')
+
 const focusedFieldKey = ref<string | null>(null)
 
 function focusField(key: string) {
@@ -404,12 +406,14 @@ onDeactivated(() => {
         </el-form-item>
       </div>
 
-      <div class="mt-6 mb-2 flex items-center justify-between">
-        <div class="text-base font-semibold">Lines</div>
-        <el-button size="small" @click="addLine">Add line</el-button>
-      </div>
+      <el-tabs v-model="activeSectionTab" class="mt-4">
+        <el-tab-pane label="Rincian Data" name="detail">
+          <div class="mt-2 mb-2 flex items-center justify-between">
+            <div class="text-base font-semibold">Products</div>
+            <el-button size="small" @click="addLine">Add product</el-button>
+          </div>
 
-      <el-table :data="model.lines" class="w-full" border>
+          <el-table :data="model.lines" class="w-full" border>
         <el-table-column label="#" width="60">
           <template #default="scope">
             <div class="text-center">{{ scope.$index + 1 }}</div>
@@ -486,47 +490,69 @@ onDeactivated(() => {
             </el-button>
           </template>
         </el-table-column>
-      </el-table>
+          </el-table>
 
-      <div class="mt-4 flex justify-end">
-        <div class="w-full max-w-[420px]">
-          <div class="flex items-center justify-between py-1">
-            <div class="text-sm text-[var(--el-text-color-secondary)]">Sub Total</div>
-            <div class="text-sm font-medium">{{ formatMoney(lineSubtotal) }}</div>
-          </div>
+          <div class="mt-4 flex justify-end">
+            <div class="w-full max-w-[420px]">
+              <div class="flex items-center justify-between py-1">
+                <div class="text-sm text-[var(--el-text-color-secondary)]">Sub Total</div>
+                <div class="text-sm font-medium">{{ formatMoney(lineSubtotal) }}</div>
+              </div>
 
-          <div class="flex items-center justify-between gap-3 py-1">
-            <div class="text-sm text-[var(--el-text-color-secondary)]">Discount</div>
-            <el-input
-              :model-value="isFocused('discount') ? discountAmount : formatMoney(discountAmount)"
-              @update:model-value="setDiscountInput"
-              @focus="() => focusField('discount')"
-              @blur="blurField"
-              inputmode="decimal"
-              class="w-[180px]"
-              placeholder="Discount"
-            />
-          </div>
+              <div class="flex items-center justify-between gap-3 py-1">
+                <div class="text-sm text-[var(--el-text-color-secondary)]">Discount</div>
+                <el-input
+                  :model-value="isFocused('discount') ? discountAmount : formatMoney(discountAmount)"
+                  @update:model-value="setDiscountInput"
+                  @focus="() => focusField('discount')"
+                  @blur="blurField"
+                  inputmode="decimal"
+                  class="w-[180px]"
+                  placeholder="Discount"
+                />
+              </div>
 
-          <div class="flex items-center justify-between gap-3 py-1">
-            <div class="text-sm text-[var(--el-text-color-secondary)]">Tax</div>
-            <el-input
-              :model-value="isFocused('tax') ? String(model.tax_amount ?? '') : formatMoney(model.tax_amount)"
-              @update:model-value="setTaxInput"
-              @focus="() => focusField('tax')"
-              @blur="blurField"
-              inputmode="decimal"
-              class="w-[180px]"
-              placeholder="Tax"
-            />
-          </div>
+              <div class="flex items-center justify-between gap-3 py-1">
+                <div class="text-sm text-[var(--el-text-color-secondary)]">Tax</div>
+                <el-input
+                  :model-value="isFocused('tax') ? String(model.tax_amount ?? '') : formatMoney(model.tax_amount)"
+                  @update:model-value="setTaxInput"
+                  @focus="() => focusField('tax')"
+                  @blur="blurField"
+                  inputmode="decimal"
+                  class="w-[180px]"
+                  placeholder="Tax"
+                />
+              </div>
 
-          <div class="border-t border-[var(--el-border-color-light)] mt-2 pt-2 flex items-center justify-between">
-            <div class="text-sm font-semibold">Total</div>
-            <div class="text-sm font-semibold">{{ formatMoney(grandTotal) }}</div>
+              <div
+                class="border-t border-[var(--el-border-color-light)] mt-2 pt-2 flex items-center justify-between"
+              >
+                <div class="text-sm font-semibold">Total</div>
+                <div class="text-sm font-semibold">{{ formatMoney(grandTotal) }}</div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </el-tab-pane>
+
+        <el-tab-pane label="Uang Muka" name="down_payment">
+          <div class="mt-3 text-sm text-[var(--el-text-color-secondary)]">
+            Belum diimplementasikan. Rekomendasi workflow uang muka ada di catatan tim.
+          </div>
+        </el-tab-pane>
+
+        <el-tab-pane label="Informasi" name="info">
+          <div class="mt-3 text-sm text-[var(--el-text-color-secondary)]">Belum diimplementasikan.</div>
+        </el-tab-pane>
+
+        <el-tab-pane label="Biaya Lainnya" name="charges">
+          <div class="mt-3 text-sm text-[var(--el-text-color-secondary)]">Belum diimplementasikan.</div>
+        </el-tab-pane>
+
+        <el-tab-pane label="Dokumen" name="docs">
+          <div class="mt-3 text-sm text-[var(--el-text-color-secondary)]">Belum diimplementasikan.</div>
+        </el-tab-pane>
+      </el-tabs>
     </el-form>
   </div>
 </template>

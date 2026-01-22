@@ -138,8 +138,9 @@ When a decision changes, record it in `docs/decisions.md` and add an entry to `d
   Perubahan yang sudah diterapkan khusus di Sales Invoice form:
 
   - Layout header diubah jadi grid (lebih ringkas, tidak row-vertikal).
+  - Struktur konten dipecah menjadi tab seperti referensi: Rincian Data (produk), Uang Muka, Informasi, Biaya Lainnya, Dokumen.
   - Field Due Date / Currency Code / Exchange Rate disembunyikan dari UI (tetap diisi default saat submit).
-  - Panel ringkasan kanan-bawah: Sub Total → Discount → Tax → Total.
+  - Panel ringkasan kanan-bawah: Sub Total → Discount → Tax → Total (di tab Rincian Data).
   - Nominal uang (Unit Price, Discount, Tax, Sub Total, Total) ditampilkan dengan pemisah ribuan; input kosong menampilkan placeholder (bukan 0.00 default).
   - UX input nominal uang memakai pola **format-on-blur** (saat fokus tampil raw) untuk menghindari bug kursor loncat ke belakang desimal.
   - Validasi wajib: Customer + Invoice Number.
