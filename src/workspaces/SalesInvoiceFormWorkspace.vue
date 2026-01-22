@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onActivated, onDeactivated, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import { listCustomers, type Customer } from '../lib/api/modules/customers'
@@ -28,24 +28,28 @@ const loaded = ref(false)
 const customers = ref<Customer[]>([])
 const products = ref<Product[]>([])
 
-const model = ref<CreateSalesInvoicePayload>({
-  customer_id: 0,
-  invoice_number: '',
-  invoice_date: new Date().toISOString().slice(0, 10),
-  due_date: new Date().toISOString().slice(0, 10),
-  currency_code: 'IDR',
-  exchange_rate: 1,
-  tax_amount: 0,
-  lines: [
-    {
-      product_id: null,
-      description: '',
-      qty: 1,
-      unit_price: 0,
-      tax_id: null,
-    },
-  ],
-})
+function createEmptyModel(): CreateSalesInvoicePayload {
+  return {
+    customer_id: 0,
+    invoice_number: '',
+    invoice_date: new Date().toISOString().slice(0, 10),
+    due_date: new Date().toISOString().slice(0, 10),
+    currency_code: 'IDR',
+    exchange_rate: 1,
+    tax_amount: 0,
+    lines: [
+      {
+        product_id: null,
+        description: '',
+        qty: 1,
+        unit_price: 0,
+        tax_id: null,
+      },
+    ],
+  }
+}
+
+const model = ref<CreateSalesInvoicePayload>(createEmptyModel())
 
 const lineSubtotal = computed(() => {
   return model.value.lines.reduce((sum, line) => {
@@ -135,6 +139,14 @@ async function load() {
   }
 }
 
+function resetForCreateOnClose() {
+  loaded.value = false
+  saving.value = false
+  loading.value = false
+  model.value = createEmptyModel()
+  clearDirty()
+}
+
 async function save() {
   saving.value = true
   try {
@@ -200,6 +212,23 @@ async function save() {
 
 onMounted(() => {
   void load()
+})
+
+onActivated(() => {
+  // If this instance was kept alive and then its tab was closed and later reopened
+  // with the same key, ensure we load again.
+  if (!loaded.value && !loading.value) {
+    void load()
+  }
+})
+
+onDeactivated(() => {
+  // KeepAlive caches instances even after tab close. We treat "tab no longer exists"
+  // as a real close event and reset only for create mode.
+  const stillOpen = tabsStore.getChildTab(props.tabId) !== null
+  if (!stillOpen && props.mode === 'create') {
+    resetForCreateOnClose()
+  }
 })
 </script>
 

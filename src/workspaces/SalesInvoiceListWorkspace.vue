@@ -30,6 +30,12 @@ async function load() {
 }
 
 function openNew() {
+  const existing = tabsStore.getChildTab('sales-invoices::new')
+  if (existing) {
+    tabsStore.activateChildTab(existing.id)
+    return
+  }
+
   const result = tabsStore.openChildTab({
     localId: 'new',
     title: 'New Sales Invoice',
