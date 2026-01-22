@@ -120,7 +120,34 @@ When a decision changes, record it in `docs/decisions.md` and add an entry to `d
 - Auth is enabled by default (`VITE_AUTH_ENABLED=true` in `.env.example`) but can be disabled for dev via `VITE_AUTH_ENABLED=false`.
 - `/setup/company` is treated as a public route so initial provisioning can be completed even when auth is enabled.
 - Master data list workspaces are wired to backend APIs: Customers, Vendors, Products, Warehouses.
-- Phase 7.4 started: Sales Invoices list + create/edit form are wired to backend `/sales-invoices` and open as Virtual sub-tabs (auto-close form tab on save).
+- Phase 7.4 in progress (transactional modules):
+  - Sales Invoices list + create/edit form are wired to backend `/sales-invoices` and open as Virtual sub-tabs (auto-close form tab on save).
+  - Customer Payments list + create/edit form are wired to backend `/customer-payments`.
+  - Sales Returns list + create form are wired to backend `/sales-returns` (existing records open in view mode).
+  - Purchase Orders list + create/edit form are wired to backend `/purchase-orders`.
+  - Vendor Invoices list + create/edit form are wired to backend `/vendor-invoices`.
+  - Vendor Payments list + create/edit form are wired to backend `/vendor-payments`.
+  - Purchase Returns list + create form are wired to backend `/purchase-returns` (existing records open in view mode).
+  - Inventory Movements list + create/edit form are wired to backend `/inventory-movements`.
+  - Inventory Receivings list + create/edit form are wired to backend `/inventory-receivings`.
+  - Warehouse Transfers list + create/edit form are wired to backend `/warehouse-transfers`.
+  - Create-mode forms follow the KeepAlive-safe reset-on-close pattern: on true tab close, reset local form state so reopening “New” doesn’t show stale data.
+
+  ## Sales Invoice — UI/UX Customizations (Template untuk form lain)
+
+  Perubahan yang sudah diterapkan khusus di Sales Invoice form:
+
+  - Layout header diubah jadi grid (lebih ringkas, tidak row-vertikal).
+  - Field Due Date / Currency Code / Exchange Rate disembunyikan dari UI (tetap diisi default saat submit).
+  - Panel ringkasan kanan-bawah: Sub Total → Discount → Tax → Total.
+  - Nominal uang (Unit Price, Discount, Tax, Sub Total, Total) ditampilkan dengan pemisah ribuan; input kosong menampilkan placeholder (bukan 0.00 default).
+  - Validasi wajib: Customer + Invoice Number.
+  - Aturan enable/disable:
+    - Product tidak bisa dipilih sebelum Customer & Invoice Number terisi.
+    - Qty/Unit Price tidak bisa diisi sebelum Product dipilih.
+  - Qty dibuat integer (tanpa desimal) dan menampilkan satuan (UOM) di samping input.
+  - Kolom Description di UI dihilangkan; untuk sementara `lines.*.description` tetap dikirim dan diisi otomatis dari product name (backend masih mewajibkan).
+  - Discount saat ini masih UI-only (belum dipersist), dicatat sebagai TODO.
 
 Styling rule (maintenance):
 

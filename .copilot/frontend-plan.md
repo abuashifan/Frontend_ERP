@@ -228,15 +228,20 @@ Last updated: 2026-01-22
 Module checklist (7.4 scope):
 
 - [x] Sales Invoices (AR) — list + create/edit form wired to backend `/sales-invoices`
-- [ ] Customer Payments (AR) — placeholder only
-- [ ] Sales Returns (AR) — placeholder only
-- [ ] Purchase Orders (AP) — placeholder only
-- [ ] Vendor Invoices (AP) — placeholder only
-- [ ] Vendor Payments (AP) — placeholder only
-- [ ] Purchase Returns (AP) — placeholder only
-- [ ] Inventory Movements — placeholder only
-- [ ] Inventory Receivings — placeholder only
-- [ ] Warehouse Transfers — placeholder only
+- [x] Customer Payments (AR) — list + create/edit form wired to backend `/customer-payments`
+- [x] Sales Returns (AR) — list + create form (view mode for existing)
+- [x] Purchase Orders (AP) — list + create/edit form wired to backend `/purchase-orders`
+- [x] Vendor Invoices (AP) — list + create/edit form wired to backend `/vendor-invoices`
+- [x] Vendor Payments (AP) — list + create/edit form
+- [x] Purchase Returns (AP) — list + create form (view mode for existing)
+- [x] Inventory Movements — list + create/edit form
+- [x] Inventory Receivings — list + create/edit form
+- [x] Warehouse Transfers — list + create/edit form
+
+Catatan tertunda (setelah desain form Sales Invoice final):
+
+- [ ] Sales Invoice — Persist invoice-level discount via `POST /ar/invoices/{salesInvoice}/charges` (requires `account_code`) — NOT STARTED
+- [ ] Sales Invoice — Backend: hilangkan field/validasi `lines.*.description` (UI sudah disembunyikan; sekarang diisi otomatis dari product) — NOT STARTED
 
 ---
 

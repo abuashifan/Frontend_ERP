@@ -143,11 +143,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
     defaultChild: {
       localId: 'list',
       title: 'Customer Payments',
-      component: 'PlaceholderWorkspace',
-      props: {
-        title: 'Customer Payments',
-        description: 'Planned: list + create/edit/post (Phase 7.4+).',
-      },
+      component: 'CustomerPaymentsListWorkspace',
       closable: false,
     },
   },
@@ -159,11 +155,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
     defaultChild: {
       localId: 'list',
       title: 'Sales Returns',
-      component: 'PlaceholderWorkspace',
-      props: {
-        title: 'Sales Returns',
-        description: 'Planned: return list + form (Phase 7.4+).',
-      },
+      component: 'SalesReturnsListWorkspace',
       closable: false,
     },
   },
@@ -175,11 +167,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
     defaultChild: {
       localId: 'list',
       title: 'Purchase Orders',
-      component: 'PlaceholderWorkspace',
-      props: {
-        title: 'Purchase Orders',
-        description: 'Planned: PO list + form + approve/cancel (Phase 7.4+).',
-      },
+      component: 'PurchaseOrdersListWorkspace',
       closable: false,
     },
   },
@@ -191,11 +179,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
     defaultChild: {
       localId: 'list',
       title: 'Vendor Invoices',
-      component: 'PlaceholderWorkspace',
-      props: {
-        title: 'Vendor Invoices',
-        description: 'Planned: invoice list + form + approve/post (Phase 7.4+).',
-      },
+      component: 'VendorInvoicesListWorkspace',
       closable: false,
     },
   },
@@ -207,11 +191,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
     defaultChild: {
       localId: 'list',
       title: 'Vendor Payments',
-      component: 'PlaceholderWorkspace',
-      props: {
-        title: 'Vendor Payments',
-        description: 'Planned: payment list + form + approve/post (Phase 7.4+).',
-      },
+      component: 'VendorPaymentsListWorkspace',
       closable: false,
     },
   },
@@ -223,11 +203,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
     defaultChild: {
       localId: 'list',
       title: 'Purchase Returns',
-      component: 'PlaceholderWorkspace',
-      props: {
-        title: 'Purchase Returns',
-        description: 'Planned: return list + form (Phase 7.4+).',
-      },
+      component: 'PurchaseReturnsListWorkspace',
       closable: false,
     },
   },
@@ -239,11 +215,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
     defaultChild: {
       localId: 'list',
       title: 'Inventory Movements',
-      component: 'PlaceholderWorkspace',
-      props: {
-        title: 'Inventory Movements',
-        description: 'Planned: stock in/out list + form + post (Phase 7.4+).',
-      },
+      component: 'InventoryMovementsListWorkspace',
       closable: false,
     },
   },
@@ -255,11 +227,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
     defaultChild: {
       localId: 'list',
       title: 'Inventory Receivings',
-      component: 'PlaceholderWorkspace',
-      props: {
-        title: 'Inventory Receivings',
-        description: 'Planned: receiving list + form + post (Phase 7.4+).',
-      },
+      component: 'InventoryReceivingsListWorkspace',
       closable: false,
     },
   },
@@ -271,11 +239,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
     defaultChild: {
       localId: 'list',
       title: 'Warehouse Transfers',
-      component: 'PlaceholderWorkspace',
-      props: {
-        title: 'Warehouse Transfers',
-        description: 'Planned: transfer list + form + approve/post (Phase 7.4+).',
-      },
+      component: 'WarehouseTransfersListWorkspace',
       closable: false,
     },
   },

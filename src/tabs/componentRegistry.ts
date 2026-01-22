@@ -18,4 +18,64 @@ export const tabComponentRegistry: Record<string, Component> = {
   SalesInvoiceFormWorkspace: defineAsyncComponent(
     () => import('../workspaces/SalesInvoiceFormWorkspace.vue'),
   ),
+  PurchaseOrdersListWorkspace: defineAsyncComponent(
+    () => import('../workspaces/PurchaseOrdersListWorkspace.vue'),
+  ),
+  PurchaseOrderFormWorkspace: defineAsyncComponent(
+    () => import('../workspaces/PurchaseOrderFormWorkspace.vue'),
+  ),
+  VendorInvoicesListWorkspace: defineAsyncComponent(
+    () => import('../workspaces/VendorInvoicesListWorkspace.vue'),
+  ),
+  VendorInvoiceFormWorkspace: defineAsyncComponent(
+    () => import('../workspaces/VendorInvoiceFormWorkspace.vue'),
+  ),
+  CustomerPaymentsListWorkspace: defineAsyncComponent(
+    () => import('../workspaces/CustomerPaymentsListWorkspace.vue'),
+  ),
+  CustomerPaymentFormWorkspace: defineAsyncComponent(
+    () => import('../workspaces/CustomerPaymentFormWorkspace.vue'),
+  ),
+
+  SalesReturnsListWorkspace: defineAsyncComponent(
+    () => import('../workspaces/SalesReturnsListWorkspace.vue'),
+  ),
+  SalesReturnFormWorkspace: defineAsyncComponent(
+    () => import('../workspaces/SalesReturnFormWorkspace.vue'),
+  ),
+
+  VendorPaymentsListWorkspace: defineAsyncComponent(
+    () => import('../workspaces/VendorPaymentsListWorkspace.vue'),
+  ),
+  VendorPaymentFormWorkspace: defineAsyncComponent(
+    () => import('../workspaces/VendorPaymentFormWorkspace.vue'),
+  ),
+
+  PurchaseReturnsListWorkspace: defineAsyncComponent(
+    () => import('../workspaces/PurchaseReturnsListWorkspace.vue'),
+  ),
+  PurchaseReturnFormWorkspace: defineAsyncComponent(
+    () => import('../workspaces/PurchaseReturnFormWorkspace.vue'),
+  ),
+
+  InventoryMovementsListWorkspace: defineAsyncComponent(
+    () => import('../workspaces/InventoryMovementsListWorkspace.vue'),
+  ),
+  InventoryMovementFormWorkspace: defineAsyncComponent(
+    () => import('../workspaces/InventoryMovementFormWorkspace.vue'),
+  ),
+
+  InventoryReceivingsListWorkspace: defineAsyncComponent(
+    () => import('../workspaces/InventoryReceivingsListWorkspace.vue'),
+  ),
+  InventoryReceivingFormWorkspace: defineAsyncComponent(
+    () => import('../workspaces/InventoryReceivingFormWorkspace.vue'),
+  ),
+
+  WarehouseTransfersListWorkspace: defineAsyncComponent(
+    () => import('../workspaces/WarehouseTransfersListWorkspace.vue'),
+  ),
+  WarehouseTransferFormWorkspace: defineAsyncComponent(
+    () => import('../workspaces/WarehouseTransferFormWorkspace.vue'),
+  ),
 }
