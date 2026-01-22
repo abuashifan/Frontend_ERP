@@ -1,6 +1,6 @@
 # Frontend ERP (Vue 3) — Project Context
 
-Last updated: 2026-01-21
+Last updated: 2026-01-22
 
 ## Tracking Files (Source of Truth)
 
@@ -120,6 +120,7 @@ When a decision changes, record it in `docs/decisions.md` and add an entry to `d
 - Auth is enabled by default (`VITE_AUTH_ENABLED=true` in `.env.example`) but can be disabled for dev via `VITE_AUTH_ENABLED=false`.
 - `/setup/company` is treated as a public route so initial provisioning can be completed even when auth is enabled.
 - Master data list workspaces are wired to backend APIs: Customers, Vendors, Products, Warehouses.
+- Phase 7.4 started: Sales Invoices list + create/edit form are wired to backend `/sales-invoices` and open as Virtual sub-tabs (auto-close form tab on save).
 
 Styling rule (maintenance):
 

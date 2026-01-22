@@ -1,6 +1,6 @@
 # Frontend ERP (Vue 3) — Master Project Plan
 
-Last updated: 2026-01-21
+Last updated: 2026-01-22
 
 ## Rules (Non-Negotiable)
 
@@ -220,10 +220,11 @@ Last updated: 2026-01-21
 - Show all modules/menu items that will be used in the ERP
 - Menu items can point to placeholder workspaces until implemented
 
-[7.4] Form workspaces (next modules) — NOT STARTED
+[7.4] Form workspaces (next modules) — IN PROGRESS (2026-01-22)
 
 - Add basic create/edit forms for non-master-data modules (AP/AR/Inventory/Accounting)
 - Must follow Virtual Tabs rules (open list + form/detail as sub-tabs)
+- Implemented (first): Sales Invoices list + create/edit form wired to backend `/sales-invoices`
 
 ---
 
