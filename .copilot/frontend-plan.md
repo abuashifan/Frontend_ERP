@@ -224,7 +224,19 @@ Last updated: 2026-01-22
 
 - Add basic create/edit forms for non-master-data modules (AP/AR/Inventory/Accounting)
 - Must follow Virtual Tabs rules (open list + form/detail as sub-tabs)
-- Implemented (first): Sales Invoices list + create/edit form wired to backend `/sales-invoices`
+
+Module checklist (7.4 scope):
+
+- [x] Sales Invoices (AR) — list + create/edit form wired to backend `/sales-invoices`
+- [ ] Customer Payments (AR) — placeholder only
+- [ ] Sales Returns (AR) — placeholder only
+- [ ] Purchase Orders (AP) — placeholder only
+- [ ] Vendor Invoices (AP) — placeholder only
+- [ ] Vendor Payments (AP) — placeholder only
+- [ ] Purchase Returns (AP) — placeholder only
+- [ ] Inventory Movements — placeholder only
+- [ ] Inventory Receivings — placeholder only
+- [ ] Warehouse Transfers — placeholder only
 
 ---
 
