@@ -141,11 +141,12 @@ When a decision changes, record it in `docs/decisions.md` and add an entry to `d
   - Field Due Date / Currency Code / Exchange Rate disembunyikan dari UI (tetap diisi default saat submit).
   - Panel ringkasan kanan-bawah: Sub Total → Discount → Tax → Total.
   - Nominal uang (Unit Price, Discount, Tax, Sub Total, Total) ditampilkan dengan pemisah ribuan; input kosong menampilkan placeholder (bukan 0.00 default).
+  - UX input nominal uang memakai pola **format-on-blur** (saat fokus tampil raw) untuk menghindari bug kursor loncat ke belakang desimal.
   - Validasi wajib: Customer + Invoice Number.
   - Aturan enable/disable:
     - Product tidak bisa dipilih sebelum Customer & Invoice Number terisi.
     - Qty/Unit Price tidak bisa diisi sebelum Product dipilih.
-  - Qty dibuat integer (tanpa desimal) dan menampilkan satuan (UOM) di samping input.
+  - Qty dibuat integer (tanpa desimal), menampilkan satuan (UOM) di samping input, dan saat blur ditampilkan dengan pemisah ribuan format Indonesia (contoh `1000` → `1.000`).
   - Kolom Description di UI dihilangkan; untuk sementara `lines.*.description` tetap dikirim dan diisi otomatis dari product name (backend masih mewajibkan).
   - Discount saat ini masih UI-only (belum dipersist), dicatat sebagai TODO.
 
