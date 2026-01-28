@@ -7,6 +7,15 @@ import vueParser from 'vue-eslint-parser'
 export default [
   { ignores: ['dist/**', 'node_modules/**'] },
 
+  // Recognize `console` as a global to avoid no-undef for logging
+  {
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+      },
+    },
+  },
+
   js.configs.recommended,
   ...tseslint.configs.recommended,
 

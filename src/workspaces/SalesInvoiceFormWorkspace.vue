@@ -221,7 +221,6 @@ async function loadCharges() {
     // For now, we'll try to load charges but handle the error gracefully.
     charges.value = await listSalesInvoiceCharges(props.invoiceId)
   } catch (err: unknown) {
-    // eslint-disable-next-line no-undef
     console.warn('Failed to load charges. Endpoint might not be implemented yet.', err)
     charges.value = []
   } finally {
