@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
-import { listProducts, type Product } from '../lib/api/modules/products'
+import { listProductCategories, type ProductCategory } from '../lib/api/modules/productCategories'
 import { useTabsStore } from '../stores/tabs'
 
 defineProps<{ tabId: string }>()
@@ -11,29 +11,18 @@ const tabsStore = useTabsStore()
 
 const loading = ref(false)
 const errorMessage = ref<string | null>(null)
-const rows = ref<Product[]>([])
-
-function formatQty(value: unknown): string {
-  if (value === null || value === undefined || value === '') return '0'
-  const num = typeof value === 'number' ? value : Number(String(value))
-  if (!Number.isFinite(num)) return String(value)
-  return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(num)
-}
-
-function typeLabel(type: Product['type']): string {
-  return type === 'stock_item' ? 'Inventory' : 'Service'
-}
+const rows = ref<ProductCategory[]>([])
 
 async function load() {
   loading.value = true
   errorMessage.value = null
 
   try {
-    rows.value = await listProducts()
+    rows.value = await listProductCategories()
   } catch (err: unknown) {
     const maybe = err as { response?: { data?: { message?: unknown } }; message?: unknown }
-    const message = maybe?.response?.data?.message ?? maybe?.message ?? 'Gagal memuat products'
-    errorMessage.value = String(message ?? 'Gagal memuat products')
+    const message = maybe?.response?.data?.message ?? maybe?.message ?? 'Gagal memuat product categories'
+    errorMessage.value = String(message ?? 'Gagal memuat product categories')
     ElMessage.error(errorMessage.value)
   } finally {
     loading.value = false
@@ -43,8 +32,8 @@ async function load() {
 function openNew() {
   const result = tabsStore.openChildTab({
     localId: 'new',
-    title: 'New Product',
-    component: 'ProductFormWorkspace',
+    title: 'New Product Category',
+    component: 'ProductCategoryFormWorkspace',
     props: { mode: 'create' },
     closable: true,
   })
@@ -52,12 +41,12 @@ function openNew() {
   if (!result.ok) ElMessage.warning(result.message)
 }
 
-function openEdit(row: Product) {
+function openEdit(row: ProductCategory) {
   const result = tabsStore.openChildTab({
     localId: `edit-${row.id}`,
-    title: `Edit Product ${row.code}`,
-    component: 'ProductFormWorkspace',
-    props: { mode: 'edit', productId: row.id },
+    title: `Edit Category ${row.code}`,
+    component: 'ProductCategoryFormWorkspace',
+    props: { mode: 'edit', productCategoryId: row.id },
     closable: true,
   })
 
@@ -73,7 +62,7 @@ onMounted(() => {
   <div class="p-4">
     <div class="flex items-center justify-between gap-3 mb-3">
       <div>
-        <div class="text-lg font-semibold">Products</div>
+        <div class="text-lg font-semibold">Product Categories</div>
         <div class="text-sm text-[var(--el-text-color-secondary)]">Data diambil dari backend.</div>
       </div>
       <div class="flex items-center gap-2">
@@ -91,34 +80,9 @@ onMounted(() => {
       class="w-full"
       @row-dblclick="openEdit"
     >
-      <el-table-column label="#" width="70" align="center">
-        <template #default="scope">
-          <div class="text-center">{{ scope.$index + 1 }}</div>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="name" label="Nama Product" min-width="240" />
-
-      <el-table-column prop="description" label="Description" min-width="280" />
-
-      <el-table-column label="Jumlah / Qty" width="140" align="right">
-        <template #default="scope">
-          <div class="text-right">{{ formatQty(scope.row.on_hand_qty) }}</div>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="uom" label="Unit" width="120" />
-
-      <el-table-column label="Type" width="140">
-        <template #default="scope">
-          {{ typeLabel(scope.row.type) }}
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="category_name" label="Category" min-width="200" />
-
+      <el-table-column prop="id" label="ID" width="90" />
       <el-table-column prop="code" label="Code" width="140" />
-
+      <el-table-column prop="name" label="Name" min-width="240" />
       <el-table-column prop="is_active" label="Active" width="110">
         <template #default="scope">
           <el-tag :type="scope.row.is_active ? 'success' : 'info'">
@@ -128,10 +92,7 @@ onMounted(() => {
       </el-table-column>
     </el-table>
 
-    <div
-      v-if="!loading && !errorMessage && rows.length === 0"
-      class="mt-3 text-sm text-[var(--el-text-color-secondary)]"
-    >
+    <div v-if="!loading && !errorMessage && rows.length === 0" class="mt-3 text-sm text-[var(--el-text-color-secondary)]">
       Tidak ada data.
     </div>
   </div>

@@ -24,6 +24,7 @@ export type SalesInvoice = {
   id: number
   company_id: number
   customer_id: number
+  warehouse_id: number | null
   invoice_number: string
   invoice_date: string
   due_date: string
@@ -47,6 +48,7 @@ export type SalesInvoice = {
 
 export type CreateSalesInvoicePayload = {
   customer_id: number
+  warehouse_id?: number | null
   invoice_number: string
   invoice_date: string
   due_date: string

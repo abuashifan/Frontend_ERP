@@ -10,6 +10,7 @@ import {
   type ProductType,
   type CreateProductPayload,
 } from '../lib/api/modules/products'
+import { listProductCategories, type ProductCategory } from '../lib/api/modules/productCategories'
 import { useTabDirty } from '../composables/useTabDirty'
 import { useTabsStore } from '../stores/tabs'
 
@@ -26,10 +27,14 @@ const tabsStore = useTabsStore()
 const model = ref<CreateProductPayload>({
   code: '',
   name: '',
+  description: null,
+  category_id: null,
   type: 'stock_item',
   uom: 'PCS',
   is_active: true,
 })
+
+const categories = ref<ProductCategory[]>([])
 
 const typeOptions: Array<{ label: string; value: ProductType }> = [
   { label: 'Stock Item', value: 'stock_item' },
@@ -38,6 +43,12 @@ const typeOptions: Array<{ label: string; value: ProductType }> = [
 
 async function load() {
   if (!isEdit.value) {
+    try {
+      categories.value = await listProductCategories()
+    } catch (err: unknown) {
+      const maybe = err as { response?: { data?: { message?: unknown } }; message?: unknown }
+      ElMessage.error(String(maybe?.response?.data?.message ?? maybe?.message ?? 'Gagal memuat product categories'))
+    }
     loaded.value = true
     return
   }
@@ -49,10 +60,13 @@ async function load() {
 
   loading.value = true
   try {
+    categories.value = await listProductCategories()
     const product: Product = await getProduct(props.productId)
     model.value = {
       code: product.code,
       name: product.name,
+      description: product.description ?? null,
+      category_id: product.category_id ?? null,
       type: product.type,
       uom: product.uom,
       is_active: product.is_active,
@@ -121,6 +135,16 @@ onMounted(() => {
 
       <el-form-item label="Name">
         <el-input v-model="model.name" />
+      </el-form-item>
+
+      <el-form-item label="Description">
+        <el-input v-model="model.description" type="textarea" :rows="3" />
+      </el-form-item>
+
+      <el-form-item label="Category">
+        <el-select v-model="model.category_id" class="w-full" clearable filterable>
+          <el-option v-for="c in categories" :key="c.id" :label="`${c.code} — ${c.name}`" :value="c.id" />
+        </el-select>
       </el-form-item>
 
       <el-form-item label="Type">

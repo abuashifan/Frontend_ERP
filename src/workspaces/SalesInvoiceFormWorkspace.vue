@@ -4,6 +4,7 @@ import { ElMessage } from 'element-plus'
 
 import { listCustomers, type Customer } from '../lib/api/modules/customers'
 import { listProducts, type Product } from '../lib/api/modules/products'
+import { listWarehouses, type Warehouse } from '../lib/api/modules/warehouses'
 import {
   createSalesInvoice,
   getSalesInvoice,
@@ -27,6 +28,7 @@ const loaded = ref(false)
 
 const customers = ref<Customer[]>([])
 const products = ref<Product[]>([])
+const warehouses = ref<Warehouse[]>([])
 const notes = ref('')
 const discountAmount = ref<string>('')
 
@@ -111,6 +113,7 @@ function setTaxInput(value: string) {
 function createEmptyModel(): CreateSalesInvoicePayload {
   return {
     customer_id: 0,
+    warehouse_id: null,
     invoice_number: '',
     invoice_date: new Date().toISOString().slice(0, 10),
     due_date: new Date().toISOString().slice(0, 10),
@@ -196,9 +199,10 @@ function removeLine(index: number) {
 async function load() {
   loading.value = true
   try {
-    const [c, p] = await Promise.all([listCustomers(), listProducts()])
+    const [c, p, w] = await Promise.all([listCustomers(), listProducts(), listWarehouses()])
     customers.value = c
     products.value = p
+    warehouses.value = w
 
     if (isEdit.value) {
       if (!props.invoiceId) {
@@ -209,6 +213,7 @@ async function load() {
       const invoice: SalesInvoice = await getSalesInvoice(props.invoiceId)
       model.value = {
         customer_id: invoice.customer_id,
+        warehouse_id: invoice.warehouse_id ?? null,
         invoice_number: invoice.invoice_number,
         invoice_date: String(invoice.invoice_date).slice(0, 10),
         due_date: String(invoice.due_date).slice(0, 10),
@@ -266,6 +271,11 @@ async function save() {
 
     if (!model.value.customer_id || model.value.customer_id <= 0) {
       ElMessage.warning('Customer wajib diisi')
+      return
+    }
+
+    if (!model.value.warehouse_id || model.value.warehouse_id <= 0) {
+      ElMessage.warning('Warehouse wajib diisi')
       return
     }
 
@@ -382,7 +392,7 @@ onDeactivated(() => {
 
     <el-form v-else label-position="top" class="max-w-[1100px]">
       <div class="grid grid-cols-12 gap-4">
-        <el-form-item label="Customer" class="col-span-12 md:col-span-6" required>
+        <el-form-item label="Customer" class="col-span-12 md:col-span-5" required>
           <el-select v-model="model.customer_id" filterable class="w-full">
             <el-option
               v-for="c in customers"
@@ -393,11 +403,22 @@ onDeactivated(() => {
           </el-select>
         </el-form-item>
 
-        <el-form-item label="Invoice Number" class="col-span-12 md:col-span-3" required>
+        <el-form-item label="Warehouse" class="col-span-12 md:col-span-3" required>
+          <el-select v-model="model.warehouse_id" filterable class="w-full">
+            <el-option
+              v-for="w in warehouses"
+              :key="w.id"
+              :label="`${w.code} — ${w.name}`"
+              :value="w.id"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="Invoice Number" class="col-span-12 md:col-span-2" required>
           <el-input v-model="model.invoice_number" />
         </el-form-item>
 
-        <el-form-item label="Invoice Date" class="col-span-12 md:col-span-3" required>
+        <el-form-item label="Invoice Date" class="col-span-12 md:col-span-2" required>
           <el-date-picker v-model="model.invoice_date" type="date" value-format="YYYY-MM-DD" />
         </el-form-item>
 

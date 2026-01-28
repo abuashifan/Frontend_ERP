@@ -65,6 +65,18 @@ export const MENU_ITEMS: MenuItemConfig[] = [
   },
 
   {
+    id: 'product-categories',
+    title: 'Product Categories',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Product Categories',
+      component: 'ProductCategoriesListWorkspace',
+      closable: false,
+    },
+  },
+
+  {
     id: 'warehouses',
     title: 'Warehouses',
     showSubTabsBar: true,
