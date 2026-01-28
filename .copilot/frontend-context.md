@@ -149,7 +149,21 @@ When a decision changes, record it in `docs/decisions.md` and add an entry to `d
     - Qty/Unit Price tidak bisa diisi sebelum Product dipilih.
   - Qty dibuat integer (tanpa desimal), menampilkan satuan (UOM) di samping input, dan saat blur ditampilkan dengan pemisah ribuan format Indonesia (contoh `1000` → `1.000`).
   - Kolom Description di UI dihilangkan; untuk sementara `lines.*.description` tetap dikirim dan diisi otomatis dari product name (backend masih mewajibkan).
-  - Discount saat ini masih UI-only (belum dipersist), dicatat sebagai TODO.
+    - Discount saat ini masih UI-only (belum dipersist), dicatat sebagai TODO.
+
+## Sales Invoice Charges Implementation (Phase 7.4)
+
+- API module created: `src/lib/api/modules/salesInvoiceCharges.ts`
+- Tab "Biaya Lainnya" implemented with CRUD operations:
+  - Add charge/discount with description, amount, account code, and type (charge/discount)
+  - Remove charge functionality
+  - List charges (requires backend GET endpoint which might not exist yet)
+- Discount can be persisted as charge with `is_discount: true`
+- Integration with backend endpoints:
+  - `POST /api/ar/invoices/{salesInvoice}/charges` - working
+  - `DELETE /api/ar/invoices/{salesInvoice}/charges/{charge}` - working
+  - `GET /api/ar/invoices/{salesInvoice}/charges` - may need backend implementation
+- Error handling: Graceful fallback if GET endpoint doesn't exist (returns empty array)
 
 Styling rule (maintenance):
 

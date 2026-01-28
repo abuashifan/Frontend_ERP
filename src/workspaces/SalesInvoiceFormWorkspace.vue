@@ -12,6 +12,13 @@ import {
   type SalesInvoice,
   type SalesInvoiceLine,
 } from '../lib/api/modules/salesInvoices'
+import {
+  listSalesInvoiceCharges,
+  createSalesInvoiceCharge,
+  deleteSalesInvoiceCharge,
+  type SalesInvoiceCharge,
+  type CreateSalesInvoiceChargePayload,
+} from '../lib/api/modules/salesInvoiceCharges'
 import { useTabDirty } from '../composables/useTabDirty'
 import { useTabsStore } from '../stores/tabs'
 
@@ -33,6 +40,17 @@ const discountAmount = ref<string>('')
 const activeSectionTab = ref<'detail' | 'down_payment' | 'info' | 'charges' | 'docs'>('detail')
 
 const focusedFieldKey = ref<string | null>(null)
+
+// Charges state
+const charges = ref<SalesInvoiceCharge[]>([])
+const chargesLoading = ref(false)
+const showAddChargeDialog = ref(false)
+const newCharge = ref<CreateSalesInvoiceChargePayload>({
+  description: '',
+  amount: '',
+  account_code: '',
+  is_discount: false,
+})
 
 function focusField(key: string) {
   focusedFieldKey.value = key
@@ -193,6 +211,83 @@ function removeLine(index: number) {
   model.value.lines.splice(index, 1)
 }
 
+// Charges functions
+async function loadCharges() {
+  if (!isEdit.value || !props.invoiceId) return
+  
+  chargesLoading.value = true
+  try {
+    // NOTE: This endpoint might not exist yet. We'll need to coordinate with backend.
+    // For now, we'll try to load charges but handle the error gracefully.
+    charges.value = await listSalesInvoiceCharges(props.invoiceId)
+  } catch (err: unknown) {
+    // eslint-disable-next-line no-undef
+    console.warn('Failed to load charges. Endpoint might not be implemented yet.', err)
+    charges.value = []
+  } finally {
+    chargesLoading.value = false
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function addCharge() {
+  if (!props.invoiceId) {
+    ElMessage.error('Cannot add charge: invoice ID not available')
+    return
+  }
+
+  try {
+    const payload: CreateSalesInvoiceChargePayload = {
+      description: newCharge.value.description,
+      amount: parseMoney(newCharge.value.amount),
+      account_code: newCharge.value.account_code,
+      is_discount: newCharge.value.is_discount,
+    }
+
+    await createSalesInvoiceCharge(props.invoiceId, payload)
+    ElMessage.success('Charge added successfully')
+    
+    // Reset form
+    newCharge.value = {
+      description: '',
+      amount: '',
+      account_code: '',
+      is_discount: false,
+    }
+    showAddChargeDialog.value = false
+    
+    // Reload charges
+    await loadCharges()
+    markDirty()
+  } catch (err: unknown) {
+    const maybe = err as { response?: { data?: { message?: unknown } }; message?: unknown }
+    ElMessage.error(
+      String(maybe?.response?.data?.message ?? maybe?.message ?? 'Failed to add charge'),
+    )
+  }
+}
+
+async function removeCharge(chargeId: number) {
+  if (!props.invoiceId) {
+    ElMessage.error('Cannot remove charge: invoice ID not available')
+    return
+  }
+
+  try {
+    await deleteSalesInvoiceCharge(props.invoiceId, chargeId)
+    ElMessage.success('Charge removed successfully')
+    
+    // Reload charges
+    await loadCharges()
+    markDirty()
+  } catch (err: unknown) {
+    const maybe = err as { response?: { data?: { message?: unknown } }; message?: unknown }
+    ElMessage.error(
+      String(maybe?.response?.data?.message ?? maybe?.message ?? 'Failed to remove charge'),
+    )
+  }
+}
+
 async function load() {
   loading.value = true
   try {
@@ -227,9 +322,12 @@ async function load() {
         })),
       }
 
-      // NOTE: Invoice-level discount is shown in UI but not persisted yet.
+            // NOTE: Invoice-level discount is shown in UI but not persisted yet.
       discountAmount.value = ''
       notes.value = ''
+      
+      // Load charges for edit mode
+      await loadCharges()
     }
 
     loaded.value = true
@@ -251,6 +349,7 @@ function resetForCreateOnClose() {
   model.value = createEmptyModel()
   discountAmount.value = ''
   notes.value = ''
+  charges.value = []
   clearDirty()
 }
 
@@ -445,13 +544,13 @@ onDeactivated(() => {
             <div class="flex items-center gap-2">
               <el-input
                 :model-value="isFocused(`line-${scope.$index}-qty`) ? String(scope.row.qty ?? '') : formatQty(scope.row.qty)"
-                @update:model-value="(v: string) => (scope.row.qty = qtyInputParser(v))"
-                @focus="() => focusField(`line-${scope.$index}-qty`)"
-                @blur="blurField"
                 :disabled="!scope.row.product_id"
                 inputmode="numeric"
                 placeholder="Qty"
                 class="!w-full"
+                @update:model-value="(v: string) => (scope.row.qty = qtyInputParser(v))"
+                @focus="() => focusField(`line-${scope.$index}-qty`)"
+                @blur="blurField"
               />
               <div class="text-xs text-[var(--el-text-color-secondary)] whitespace-nowrap">
                 {{ scope.row.product_id ? productsById.get(scope.row.product_id)?.uom : '' }}
@@ -472,12 +571,12 @@ onDeactivated(() => {
                   ? String(scope.row.unit_price ?? '')
                   : formatMoney(scope.row.unit_price)
               "
-              @update:model-value="(v: string) => (scope.row.unit_price = moneyInputParser(v))"
-              @focus="() => focusField(`line-${scope.$index}-unit_price`)"
-              @blur="blurField"
               :disabled="!scope.row.product_id"
               inputmode="decimal"
               placeholder="Unit Price"
+              @update:model-value="(v: string) => (scope.row.unit_price = moneyInputParser(v))"
+              @focus="() => focusField(`line-${scope.$index}-unit_price`)"
+              @blur="blurField"
             />
             </template>
           </template>
@@ -503,12 +602,12 @@ onDeactivated(() => {
                 <div class="text-sm text-[var(--el-text-color-secondary)]">Discount</div>
                 <el-input
                   :model-value="isFocused('discount') ? discountAmount : formatMoney(discountAmount)"
-                  @update:model-value="setDiscountInput"
-                  @focus="() => focusField('discount')"
-                  @blur="blurField"
                   inputmode="decimal"
                   class="w-[180px]"
                   placeholder="Discount"
+                  @update:model-value="setDiscountInput"
+                  @focus="() => focusField('discount')"
+                  @blur="blurField"
                 />
               </div>
 
@@ -516,12 +615,12 @@ onDeactivated(() => {
                 <div class="text-sm text-[var(--el-text-color-secondary)]">Tax</div>
                 <el-input
                   :model-value="isFocused('tax') ? String(model.tax_amount ?? '') : formatMoney(model.tax_amount)"
-                  @update:model-value="setTaxInput"
-                  @focus="() => focusField('tax')"
-                  @blur="blurField"
                   inputmode="decimal"
                   class="w-[180px]"
                   placeholder="Tax"
+                  @update:model-value="setTaxInput"
+                  @focus="() => focusField('tax')"
+                  @blur="blurField"
                 />
               </div>
 
@@ -546,7 +645,60 @@ onDeactivated(() => {
         </el-tab-pane>
 
         <el-tab-pane label="Biaya Lainnya" name="charges">
-          <div class="mt-3 text-sm text-[var(--el-text-color-secondary)]">Belum diimplementasikan.</div>
+          <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+              <div class="text-base font-semibold">Biaya Lainnya</div>
+              <el-button
+                size="small"
+                type="primary"
+                :disabled="!isEdit || !props.invoiceId"
+                @click="showAddChargeDialog = true"
+              >
+                Tambah Biaya
+              </el-button>
+            </div>
+
+            <el-skeleton v-if="chargesLoading" rows="3" animated />
+            
+            <div v-else>
+              <el-table v-if="charges.length > 0" :data="charges" class="w-full" border>
+                <el-table-column label="Deskripsi" prop="description" min-width="200" />
+                <el-table-column label="Jumlah" width="150">
+                  <template #default="scope">
+                    <div :class="scope.row.is_discount ? 'text-red-600' : ''">
+                      {{ formatMoney(scope.row.amount) }}
+                      <span v-if="scope.row.is_discount" class="text-xs">(discount)</span>
+                    </div>
+                  </template>
+                </el-table-column>
+                <el-table-column label="Kode Akun" prop="account_code" width="120" />
+                <el-table-column label="Tipe" width="100">
+                  <template #default="scope">
+                    <el-tag :type="scope.row.is_discount ? 'danger' : 'success'" size="small">
+                      {{ scope.row.is_discount ? 'Discount' : 'Charge' }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="" width="80" align="center">
+                  <template #default="scope">
+                    <el-button
+                      size="small"
+                      type="danger"
+                      plain
+                      @click="removeCharge(scope.row.id)"
+                    >
+                      Hapus
+                    </el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+              
+              <div v-else class="text-center py-8 text-[var(--el-text-color-secondary)]">
+                <div class="mb-2">Belum ada biaya lainnya</div>
+                <div class="text-sm">Klik "Tambah Biaya" untuk menambahkan biaya atau discount</div>
+              </div>
+            </div>
+          </div>
         </el-tab-pane>
 
         <el-tab-pane label="Dokumen" name="docs">

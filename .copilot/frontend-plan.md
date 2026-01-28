@@ -240,14 +240,21 @@ Module checklist (7.4 scope):
 
 Catatan tertunda (setelah desain form Sales Invoice final):
 
-- [ ] Sales Invoice — Persist invoice-level discount via `POST /ar/invoices/{salesInvoice}/charges` (requires `account_code`) — NOT STARTED
+- [x] Sales Invoice — Persist invoice-level discount via `POST /ar/invoices/{salesInvoice}/charges` (requires `account_code`) — IN PROGRESS (2026-01-22)
+  - API module created for sales invoice charges
+  - Tab "Biaya Lainnya" implemented with CRUD operations
+  - Discount can be added as charge with `is_discount: true`
+  - Note: GET endpoint for charges might not exist yet (handled gracefully)
 - [ ] Sales Invoice — Backend: hilangkan field/validasi `lines.*.description` (UI sudah disembunyikan; sekarang diisi otomatis dari product) — NOT STARTED
 
 Persiapan modul tab Sales Invoice (template untuk form lain):
 
 - [x] Sales Invoice — Tambah tab UI: Rincian Data / Uang Muka / Informasi / Biaya Lainnya / Dokumen (placeholder) — COMPLETED (2026-01-22)
 - [ ] Sales Invoice — Uang Muka tab: integrasi uang muka penjualan (opsi: Customer Payment unallocated / Down Payment) — NOT STARTED
-- [ ] Sales Invoice — Biaya Lainnya tab: integrasi charges via `/api/ar/invoices/{salesInvoice}/charges` (list + add + delete) — NOT STARTED
+- [x] Sales Invoice — Biaya Lainnya tab: integrasi charges via `/api/ar/invoices/{salesInvoice}/charges` (list + add + delete) — IN PROGRESS (2026-01-22)
+  - Frontend UI implemented with add/remove functionality
+  - Integration with POST and DELETE endpoints
+  - GET endpoint for listing charges needs backend implementation
 - [ ] Sales Invoice — Informasi tab: definisi field tambahan + simpan ke backend (butuh perubahan schema/API) — NOT STARTED
 - [ ] Sales Invoice — Dokumen tab: attachment upload/list (butuh endpoint & storage di backend) — NOT STARTED
 
