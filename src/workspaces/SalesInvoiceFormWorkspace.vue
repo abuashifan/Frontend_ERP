@@ -31,6 +31,7 @@ const products = ref<Product[]>([])
 const warehouses = ref<Warehouse[]>([])
 const notes = ref('')
 const discountAmount = ref<string>('')
+const autoPostOnCreate = ref(true)
 
 const activeSectionTab = ref<'detail' | 'down_payment' | 'info' | 'charges' | 'docs'>('detail')
 
@@ -110,13 +111,21 @@ function setTaxInput(value: string) {
   model.value.tax_amount = moneyInputParser(value)
 }
 
+function todayLocalYmd(): string {
+  const d = new Date()
+  const yyyy = String(d.getFullYear())
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 function createEmptyModel(): CreateSalesInvoicePayload {
   return {
     customer_id: 0,
     warehouse_id: null,
     invoice_number: '',
-    invoice_date: new Date().toISOString().slice(0, 10),
-    due_date: new Date().toISOString().slice(0, 10),
+    invoice_date: todayLocalYmd(),
+    due_date: todayLocalYmd(),
     currency_code: 'IDR',
     exchange_rate: 1,
     tax_amount: '',
@@ -339,8 +348,12 @@ async function save() {
       await updateSalesInvoice(props.invoiceId, payload)
       ElMessage.success('Sales invoice updated')
     } else {
-      await createSalesInvoice(payload)
-      ElMessage.success('Sales invoice created')
+      const created = await createSalesInvoice(payload, autoPostOnCreate.value)
+      if (autoPostOnCreate.value && created.posted_at) {
+        ElMessage.success('Sales invoice created & posted')
+      } else {
+        ElMessage.success('Sales invoice created')
+      }
     }
 
     clearDirty()
@@ -385,7 +398,15 @@ onDeactivated(() => {
         <el-tag v-if="dirty" type="warning">Unsaved</el-tag>
         <el-tag v-else type="success">Saved</el-tag>
       </div>
-      <el-button type="primary" :loading="saving" @click="save">Save</el-button>
+      <div class="flex items-center gap-3">
+        <el-switch
+          v-if="!isEdit"
+          v-model="autoPostOnCreate"
+          active-text="Auto post"
+          inactive-text="Draft"
+        />
+        <el-button type="primary" :loading="saving" @click="save">Save</el-button>
+      </div>
     </div>
 
     <el-skeleton v-if="loading" rows="8" animated />

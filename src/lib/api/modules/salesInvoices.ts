@@ -7,6 +7,8 @@ type ApiEnvelope<T> = {
   data: T
 }
 
+type SalesInvoiceCreateResponse = SalesInvoice | { invoice: SalesInvoice; journal: unknown }
+
 export type SalesInvoiceStatus = 'draft' | 'approved' | 'cancelled' | 'partial' | 'paid'
 
 export type SalesInvoiceLine = {
@@ -82,18 +84,31 @@ export async function getSalesInvoice(id: number): Promise<SalesInvoice> {
   return res.data.data
 }
 
-export async function createSalesInvoice(payload: CreateSalesInvoicePayload): Promise<SalesInvoice> {
+export async function createSalesInvoice(
+  payload: CreateSalesInvoicePayload,
+  autoPost: boolean | undefined = undefined,
+): Promise<SalesInvoice> {
   const tenantStore = useTenantStore()
   if (!tenantStore.activeCompanyId) {
     throw new Error('company_id belum diset. Set `VITE_COMPANY_ID` atau aktifkan tenant switcher.')
   }
 
   const companyId = Number(tenantStore.activeCompanyId)
-  const res: AxiosResponse<ApiEnvelope<SalesInvoice>> = await api.post('/sales-invoices', {
+  const body = {
     company_id: companyId,
     ...payload,
-  })
-  return res.data.data
+  } as any
+
+  if (autoPost !== undefined) {
+    body.auto_post = Boolean(autoPost)
+  }
+
+  const res: AxiosResponse<ApiEnvelope<SalesInvoiceCreateResponse>> = await api.post('/sales-invoices', body)
+  const data = res.data.data
+  if (data && typeof data === 'object' && 'invoice' in data) {
+    return (data as { invoice: SalesInvoice }).invoice
+  }
+  return data as SalesInvoice
 }
 
 export async function updateSalesInvoice(
