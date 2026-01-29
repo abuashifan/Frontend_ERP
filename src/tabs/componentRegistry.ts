@@ -10,6 +10,12 @@ export const tabComponentRegistry: Record<string, Component> = {
   VendorFormWorkspace: defineAsyncComponent(() => import('../workspaces/VendorFormWorkspace.vue')),
   ProductsListWorkspace: defineAsyncComponent(() => import('../workspaces/ProductsListWorkspace.vue')),
   ProductFormWorkspace: defineAsyncComponent(() => import('../workspaces/ProductFormWorkspace.vue')),
+  ProductCategoriesListWorkspace: defineAsyncComponent(
+    () => import('../workspaces/ProductCategoriesListWorkspace.vue'),
+  ),
+  ProductCategoryFormWorkspace: defineAsyncComponent(
+    () => import('../workspaces/ProductCategoryFormWorkspace.vue'),
+  ),
   WarehousesListWorkspace: defineAsyncComponent(() => import('../workspaces/WarehousesListWorkspace.vue')),
   WarehouseFormWorkspace: defineAsyncComponent(() => import('../workspaces/WarehouseFormWorkspace.vue')),
   SalesInvoiceListWorkspace: defineAsyncComponent(

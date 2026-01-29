@@ -11,12 +11,16 @@ export type ProductType = 'stock_item' | 'service'
 
 export type Product = {
   id: number
+  category_id?: number | null
   company_id: number
   code: string
   name: string
+  description?: string | null
   type: ProductType
   uom: string
   is_active: boolean
+  on_hand_qty?: string | number
+  category_name?: string | null
   created_at?: string
   updated_at?: string
 }
@@ -24,6 +28,8 @@ export type Product = {
 export type CreateProductPayload = {
   code: string
   name: string
+  description?: string | null
+  category_id?: number | null
   type: ProductType
   uom: string
   is_active?: boolean
