@@ -22,9 +22,7 @@ Backend enforces tenant context using `X-Company-Id`.
 Menu **Journals** provides a GL History view backed by `GET /api/journals`.
 
 - Filter by `source_type` + `source_id` to see journals created by a transaction.
-- For Sales Invoice, the UI can group journals per invoice:
-	- `ar.sales_invoice` (AR + Revenue)
-	- `inventory.cogs` (COGS + Inventory) — only for stock items
+- For Sales Invoice, the posted journal is `ar.sales_invoice` and it includes COGS lines (Dr COGS / Cr Inventory) when applicable.
 
 Tip:
 

@@ -20,11 +20,9 @@ const filters = ref({
 })
 
 const groupByTransaction = ref(true)
-const combineSalesInvoiceCogs = ref(true)
 
 const knownSourceTypes = [
   'ar.sales_invoice',
-  'inventory.cogs',
   'ap.vendor_invoice',
   'ap.vendor_payment',
   'ar.customer_payment',
@@ -64,24 +62,19 @@ type JournalGroupRow = {
 const groupedRows = computed<JournalGroupRow[]>(() => {
   if (!groupByTransaction.value) return []
 
-  const isCombinedSalesInvoice =
-    filters.value.source_type.trim() === 'ar.sales_invoice' && combineSalesInvoiceCogs.value
-
   const map = new Map<string, JournalGroupRow>()
 
   for (const j of rows.value) {
     const sourceId = j.source_id ?? null
 
-    // If combining sales invoice journals, group only by source_id.
-    // Otherwise group by (source_type, source_id).
-    const key = isCombinedSalesInvoice
-      ? `sales-invoice:${sourceId ?? 'null'}`
-      : `${j.source_type}:${sourceId ?? 'null'}`
+    // Group by (source_type, source_id) so multiple journals created by a transaction
+    // can be seen together.
+    const key = `${j.source_type}:${sourceId ?? 'null'}`
 
     const row = map.get(key) ?? {
       key,
       source_id: sourceId,
-      source_type: isCombinedSalesInvoice ? 'sales_invoice' : j.source_type,
+      source_type: j.source_type,
       journals: [],
       total_debit: 0,
       total_credit: 0,
@@ -117,24 +110,11 @@ async function load() {
     }
 
     const selectedSourceType = filters.value.source_type.trim()
-    const shouldCombineSalesInvoice =
-      selectedSourceType === 'ar.sales_invoice' && combineSalesInvoiceCogs.value
 
-    if (shouldCombineSalesInvoice) {
-      const [ar, cogs] = await Promise.all([
-        listJournals({ ...baseParams, source_type: 'ar.sales_invoice' }),
-        listJournals({ ...baseParams, source_type: 'inventory.cogs' }),
-      ])
-
-      const merged = [...ar, ...cogs]
-      merged.sort((a, b) => b.id - a.id)
-      rows.value = merged
-    } else {
-      rows.value = await listJournals({
-        ...baseParams,
-        source_type: selectedSourceType || undefined,
-      })
-    }
+    rows.value = await listJournals({
+      ...baseParams,
+      source_type: selectedSourceType || undefined,
+    })
   } catch (err: unknown) {
     const maybe = err as { response?: { data?: { message?: unknown } }; message?: unknown }
     const message = maybe?.response?.data?.message ?? maybe?.message ?? 'Gagal memuat journals'
@@ -155,7 +135,6 @@ function reset() {
     date_to: '',
   }
   groupByTransaction.value = true
-  combineSalesInvoiceCogs.value = true
   void load()
 }
 
@@ -225,14 +204,6 @@ onMounted(() => {
       <div class="flex items-center justify-between mt-3">
         <div class="flex items-center gap-4">
           <el-switch v-model="groupByTransaction" active-text="Group per transaksi" />
-          <el-switch
-            v-if="filters.source_type === 'ar.sales_invoice'"
-            v-model="combineSalesInvoiceCogs"
-            active-text="Gabungkan AR + COGS (Sales Invoice)"
-          />
-        </div>
-        <div class="text-xs text-[var(--el-text-color-secondary)]" v-if="filters.source_type === 'ar.sales_invoice'">
-          Saat aktif, sistem akan tampilkan jurnal <code>ar.sales_invoice</code> dan <code>inventory.cogs</code> dalam 1 grup per invoice.
         </div>
       </div>
     </el-card>
