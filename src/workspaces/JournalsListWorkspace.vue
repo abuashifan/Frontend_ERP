@@ -19,8 +19,6 @@ const filters = ref({
   date_to: '' as string,
 })
 
-const groupByTransaction = ref(true)
-
 const knownSourceTypes = [
   'ar.sales_invoice',
   'ap.vendor_invoice',
@@ -48,54 +46,6 @@ function sumDebit(row: Journal) {
 function sumCredit(row: Journal) {
   return row.lines.reduce((acc, ln) => acc + Number(ln.credit ?? 0), 0)
 }
-
-type JournalGroupRow = {
-  key: string
-  source_id: number | null
-  source_type: string
-  journals: Journal[]
-  total_debit: number
-  total_credit: number
-  journal_dates: string[]
-}
-
-const groupedRows = computed<JournalGroupRow[]>(() => {
-  if (!groupByTransaction.value) return []
-
-  const map = new Map<string, JournalGroupRow>()
-
-  for (const j of rows.value) {
-    const sourceId = j.source_id ?? null
-
-    // Group by (source_type, source_id) so multiple journals created by a transaction
-    // can be seen together.
-    const key = `${j.source_type}:${sourceId ?? 'null'}`
-
-    const row = map.get(key) ?? {
-      key,
-      source_id: sourceId,
-      source_type: j.source_type,
-      journals: [],
-      total_debit: 0,
-      total_credit: 0,
-      journal_dates: [],
-    }
-
-    row.journals.push(j)
-    row.total_debit += sumDebit(j)
-    row.total_credit += sumCredit(j)
-    row.journal_dates.push(j.journal_date)
-
-    map.set(key, row)
-  }
-
-  return Array.from(map.values()).map((g) => {
-    g.journals.sort((a, b) => b.id - a.id)
-    g.journal_dates = Array.from(new Set(g.journal_dates)).sort()
-    return g
-  })
-})
-
 async function load() {
   loading.value = true
   errorMessage.value = null
@@ -110,7 +60,6 @@ async function load() {
     }
 
     const selectedSourceType = filters.value.source_type.trim()
-
     rows.value = await listJournals({
       ...baseParams,
       source_type: selectedSourceType || undefined,
@@ -134,7 +83,6 @@ function reset() {
     date_from: '',
     date_to: '',
   }
-  groupByTransaction.value = true
   void load()
 }
 
@@ -200,23 +148,11 @@ onMounted(() => {
           <el-button size="small" type="primary" :loading="loading" @click="load">Search</el-button>
         </div>
       </div>
-
-      <div class="flex items-center justify-between mt-3">
-        <div class="flex items-center gap-4">
-          <el-switch v-model="groupByTransaction" active-text="Group per transaksi" />
-        </div>
-      </div>
     </el-card>
 
     <el-alert v-if="errorMessage" type="error" :title="errorMessage" show-icon class="mb-3" />
 
-    <el-table
-      v-if="!groupByTransaction"
-      v-loading="loading"
-      :data="rows"
-      height="calc(100vh - 330px)"
-      class="w-full"
-    >
+    <el-table v-loading="loading" :data="rows" height="calc(100vh - 330px)" class="w-full">
       <el-table-column type="expand">
         <template #default="scope">
           <div class="p-2">
@@ -257,76 +193,7 @@ onMounted(() => {
       <el-table-column prop="description" label="Description" min-width="260" />
     </el-table>
 
-    <el-table
-      v-else
-      v-loading="loading"
-      :data="groupedRows"
-      height="calc(100vh - 330px)"
-      class="w-full"
-    >
-      <el-table-column type="expand">
-        <template #default="scope">
-          <div class="p-2">
-            <div class="text-sm font-medium mb-2">Journals</div>
-            <el-table :data="scope.row.journals" size="small" class="w-full">
-              <el-table-column type="expand">
-                <template #default="s2">
-                  <div class="p-2">
-                    <div class="text-sm font-medium mb-2">Lines</div>
-                    <el-table :data="s2.row.lines" size="small" class="w-full">
-                      <el-table-column prop="account.code" label="Account" width="140" />
-                      <el-table-column prop="account.name" label="Account Name" min-width="220" />
-                      <el-table-column prop="debit" label="Debit" width="140" />
-                      <el-table-column prop="credit" label="Credit" width="140" />
-                      <el-table-column prop="description" label="Desc" min-width="200" />
-                    </el-table>
-                  </div>
-                </template>
-              </el-table-column>
-
-              <el-table-column prop="id" label="ID" width="90" />
-              <el-table-column prop="journal_date" label="Date" width="120" />
-              <el-table-column prop="journal_number" label="#" width="180" />
-              <el-table-column prop="status" label="Status" width="110" />
-              <el-table-column prop="source_type" label="Source Type" width="170" />
-              <el-table-column label="Debit" width="140">
-                <template #default="s2">
-                  {{ sumDebit(s2.row).toFixed(2) }}
-                </template>
-              </el-table-column>
-              <el-table-column label="Credit" width="140">
-                <template #default="s2">
-                  {{ sumCredit(s2.row).toFixed(2) }}
-                </template>
-              </el-table-column>
-              <el-table-column prop="description" label="Description" min-width="260" />
-            </el-table>
-          </div>
-        </template>
-      </el-table-column>
-
-      <el-table-column prop="source_type" label="Group" width="160" />
-      <el-table-column prop="source_id" label="Source ID" width="120" />
-      <el-table-column label="Journal Dates" min-width="160">
-        <template #default="scope">
-          <span class="font-mono">{{ scope.row.journal_dates.join(', ') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="Journals" width="110">
-        <template #default="scope">{{ scope.row.journals.length }}</template>
-      </el-table-column>
-      <el-table-column label="Total Debit" width="140">
-        <template #default="scope">{{ scope.row.total_debit.toFixed(2) }}</template>
-      </el-table-column>
-      <el-table-column label="Total Credit" width="140">
-        <template #default="scope">{{ scope.row.total_credit.toFixed(2) }}</template>
-      </el-table-column>
-    </el-table>
-
-    <div
-      v-if="!loading && !errorMessage && (groupByTransaction ? groupedRows.length === 0 : rows.length === 0)"
-      class="mt-3 text-sm text-[var(--el-text-color-secondary)]"
-    >
+    <div v-if="!loading && !errorMessage && rows.length === 0" class="mt-3 text-sm text-[var(--el-text-color-secondary)]">
       Tidak ada data.
     </div>
   </div>
