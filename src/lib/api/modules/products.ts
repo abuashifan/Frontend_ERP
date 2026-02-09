@@ -13,11 +13,32 @@ export type Product = {
   id: number
   category_id?: number | null
   company_id: number
+  parent_product_id?: number | null
+  default_warehouse_id?: number | null
+  preferred_vendor_id?: number | null
+
+  inventory_account_id?: number | null
+  sales_account_id?: number | null
+  sales_discount_account_id?: number | null
+  sales_return_account_id?: number | null
+  purchase_return_account_id?: number | null
+  cogs_account_id?: number | null
+  unbilled_receipt_account_id?: number | null
+  goods_in_transit_account_id?: number | null
+
   code: string
   name: string
   description?: string | null
   type: ProductType
+  inventory_type?: string | null
   uom: string
+  tax_code?: string | null
+  use_serial_number?: boolean
+  is_all_users_allowed?: boolean
+  min_sales_price?: string | number | null
+  max_sales_price?: string | number | null
+  min_purchase_price?: string | number | null
+  max_purchase_price?: string | number | null
   is_active: boolean
   on_hand_qty?: string | number
   category_name?: string | null
@@ -30,8 +51,29 @@ export type CreateProductPayload = {
   name: string
   description?: string | null
   category_id?: number | null
+  parent_product_id?: number | null
+  default_warehouse_id?: number | null
+  preferred_vendor_id?: number | null
+
+  inventory_account_id?: number | null
+  sales_account_id?: number | null
+  sales_discount_account_id?: number | null
+  sales_return_account_id?: number | null
+  purchase_return_account_id?: number | null
+  cogs_account_id?: number | null
+  unbilled_receipt_account_id?: number | null
+  goods_in_transit_account_id?: number | null
+
   type: ProductType
+  inventory_type?: string | null
   uom: string
+  tax_code?: string | null
+  use_serial_number?: boolean
+  is_all_users_allowed?: boolean
+  min_sales_price?: string | number | null
+  max_sales_price?: string | number | null
+  min_purchase_price?: string | number | null
+  max_purchase_price?: string | number | null
   is_active?: boolean
 }
 

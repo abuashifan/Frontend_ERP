@@ -13,6 +13,8 @@ export type InventoryReceivingLine = {
   qty_received: string | number
   unit_cost: string | number
   bin_location?: string | null
+  serial_numbers?: string[]
+  serials?: Array<{ id?: number; serial_number: string }>
 }
 
 export type InventoryReceiving = {
@@ -38,6 +40,7 @@ export type CreateInventoryReceivingPayload = {
     qty_received: string | number
     unit_cost: string | number
     bin_location?: string | null
+    serial_numbers?: string[]
   }>
 }
 

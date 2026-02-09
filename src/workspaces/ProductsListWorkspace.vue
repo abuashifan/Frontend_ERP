@@ -109,6 +109,14 @@ onMounted(() => {
 
       <el-table-column prop="uom" label="Unit" width="120" />
 
+      <el-table-column prop="use_serial_number" label="Serial" width="120">
+        <template #default="scope">
+          <el-tag :type="scope.row.use_serial_number ? 'warning' : 'info'">
+            {{ scope.row.use_serial_number ? 'Yes' : 'No' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+
       <el-table-column label="Type" width="140">
         <template #default="scope">
           {{ typeLabel(scope.row.type) }}

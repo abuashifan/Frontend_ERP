@@ -20,6 +20,8 @@ export type SalesInvoiceLine = {
   unit_price: string | number
   line_total?: string
   tax_id?: number | null
+  serial_numbers?: string[]
+  serials?: Array<{ id?: number; serial_number: string }>
 }
 
 export type SalesInvoice = {

@@ -10,6 +10,8 @@ export type WarehouseTransferLine = {
   warehouse_transfer_id?: number
   product_id: number
   quantity: string | number
+  serial_numbers?: string[]
+  serials?: Array<{ id?: number; serial_number: string }>
 }
 
 export type WarehouseTransfer = {
@@ -35,6 +37,7 @@ export type CreateWarehouseTransferPayload = {
   lines: Array<{
     product_id: number
     quantity: string | number
+    serial_numbers?: string[]
   }>
 }
 
