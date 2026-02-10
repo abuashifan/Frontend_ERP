@@ -24,7 +24,9 @@ export async function listChartOfAccounts(): Promise<ChartOfAccount[]> {
 
   const companyId = Number(tenantStore.activeCompanyId)
   const res: AxiosResponse<ApiEnvelope<ChartOfAccount[]>> = await api.get('/chart-of-accounts', {
-    params: { company_id: companyId, postable_only: true, active_only: true },
+    // Laravel's boolean validator accepts 1/0 (and true/false), but querystring
+    // serialization often produces "true"/"false" strings. Use 1/0 to be safe.
+    params: { company_id: companyId, postable_only: 1, active_only: 1 },
   })
   return res.data.data
 }

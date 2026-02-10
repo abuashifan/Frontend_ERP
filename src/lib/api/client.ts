@@ -5,10 +5,50 @@ import { useTenantStore } from '../../stores/tenant'
 import { emitAuthUnauthorized } from '../events'
 import { getApiBaseUrl } from './baseUrl'
 
+function serializeQueryParams(params: unknown): string {
+  const search = new URLSearchParams()
+
+  const append = (key: string, value: unknown) => {
+    if (value === undefined || value === null) return
+
+    if (Array.isArray(value)) {
+      for (const v of value) append(key, v)
+      return
+    }
+
+    if (typeof value === 'object') {
+      for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+        append(`${key}[${k}]`, v)
+      }
+      return
+    }
+
+    if (typeof value === 'boolean') {
+      search.append(key, value ? '1' : '0')
+      return
+    }
+
+    search.append(key, String(value))
+  }
+
+  if (params && typeof params === 'object') {
+    for (const [k, v] of Object.entries(params as Record<string, unknown>)) {
+      append(k, v)
+    }
+  }
+
+  return search.toString()
+}
+
 export const api = axios.create({
   baseURL: getApiBaseUrl(),
   headers: {
     Accept: 'application/json',
+  },
+  // Prevent querystring booleans from becoming "true"/"false" strings.
+  // Laravel's boolean validator is strict; it reliably accepts 1/0.
+  paramsSerializer: {
+    serialize: serializeQueryParams,
   },
 })
 
