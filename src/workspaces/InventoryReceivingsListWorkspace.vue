@@ -13,6 +13,20 @@ const loading = ref(false)
 const errorMessage = ref<string | null>(null)
 const rows = ref<InventoryReceiving[]>([])
 
+function isSerialRequired(row: InventoryReceiving): boolean {
+  return Boolean(row.serial_is_required)
+}
+
+function isSerialComplete(row: InventoryReceiving): boolean {
+  return Boolean(row.serial_is_complete)
+}
+
+function serialBadgeLabel(row: InventoryReceiving): string {
+  const req = Number(row.serial_required_qty ?? 0)
+  const cap = Number(row.serial_captured_qty ?? 0)
+  return `${cap}/${req}`
+}
+
 async function load() {
   loading.value = true
   errorMessage.value = null
@@ -95,6 +109,19 @@ onMounted(() => {
       <el-table-column prop="warehouse_id" label="Warehouse" width="120" />
       <el-table-column prop="purchase_order_id" label="PO" width="120" />
       <el-table-column prop="vendor_invoice_id" label="Vendor Invoice" width="140" />
+      <el-table-column label="Serial" width="170">
+        <template #default="scope">
+          <div v-if="isSerialRequired(scope.row)">
+            <el-tag :type="isSerialComplete(scope.row) ? 'success' : 'danger'">
+              {{ isSerialComplete(scope.row) ? 'Serial OK' : 'Serial incomplete' }}
+            </el-tag>
+            <span class="ml-2 text-xs text-[var(--el-text-color-secondary)]">
+              {{ serialBadgeLabel(scope.row) }}
+            </span>
+          </div>
+          <div v-else class="text-xs text-[var(--el-text-color-secondary)]">-</div>
+        </template>
+      </el-table-column>
       <el-table-column prop="received_at" label="Received At" width="180" />
       <el-table-column prop="posted_at" label="Posted At" width="180" />
     </el-table>

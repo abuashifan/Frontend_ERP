@@ -38,6 +38,8 @@ export type SalesInvoice = {
   subtotal: string
   tax_amount: string
   total_amount: string
+  serial_captured?: boolean
+  serial_captured_count?: number
   created_by: number
   approved_by: number | null
   approved_at: string | null

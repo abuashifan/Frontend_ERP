@@ -25,6 +25,10 @@ export type WarehouseTransfer = {
   created_by: number
   approved_by: number | null
   posted_by: number | null
+  serial_required_qty?: string | number
+  serial_captured_qty?: string | number
+  serial_is_required?: boolean | number
+  serial_is_complete?: boolean | number
   lines?: WarehouseTransferLine[]
 }
 

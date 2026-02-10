@@ -13,6 +13,10 @@ const loading = ref(false)
 const errorMessage = ref<string | null>(null)
 const rows = ref<SalesInvoice[]>([])
 
+function hasSerialCaptured(row: SalesInvoice): boolean {
+  return Boolean(row.serial_captured) || Number(row.serial_captured_count ?? 0) > 0
+}
+
 async function load() {
   loading.value = true
   errorMessage.value = null
@@ -102,6 +106,12 @@ onMounted(() => {
           <el-tag :type="scope.row.status === 'draft' ? 'info' : 'success'">
             {{ scope.row.status }}
           </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="Serial" width="150">
+        <template #default="scope">
+          <el-tag v-if="hasSerialCaptured(scope.row)" type="warning">Serial captured</el-tag>
+          <span v-else class="text-xs text-[var(--el-text-color-secondary)]">-</span>
         </template>
       </el-table-column>
       <el-table-column prop="currency_code" label="CCY" width="90" />

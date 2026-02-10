@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onActivated, onDeactivated, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onActivated, onDeactivated, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import { listCustomers, type Customer } from '../lib/api/modules/customers'
@@ -91,6 +91,75 @@ function serialNumbersToText(serialNumbers: unknown): string {
 function setLineSerialNumbers(line: SalesInvoiceLine, rawText: string) {
   const parsed = parseSerialNumbersInput(rawText)
   line.serial_numbers = parsed.length ? parsed : undefined
+}
+
+const serialInputRefs = ref<any[]>([])
+
+function setSerialInputRef(index: number, el: any) {
+  if (!el) {
+    serialInputRefs.value[index] = undefined
+    return
+  }
+  serialInputRefs.value[index] = el
+}
+
+function clearLineSerialNumbers(line: SalesInvoiceLine) {
+  line.serial_numbers = undefined
+}
+
+function normalizeSerials(serialNumbers: unknown): string[] {
+  if (!Array.isArray(serialNumbers)) return []
+  return serialNumbers.map((s) => String(s ?? '').trim()).filter(Boolean)
+}
+
+function getDuplicateSerials(serialNumbers: unknown): string[] {
+  const normalized = normalizeSerials(serialNumbers)
+  const counts = new Map<string, number>()
+  for (const s of normalized) counts.set(s, (counts.get(s) ?? 0) + 1)
+  return Array.from(counts.entries())
+    .filter(([, c]) => c > 1)
+    .map(([s]) => s)
+}
+
+function getSerialWarning(line: SalesInvoiceLine): string | null {
+  const serials = normalizeSerials(line.serial_numbers)
+  if (serials.length < 1) return null // optional for Sales Invoice
+
+  const qty = Math.trunc(parseMoney(line.qty))
+  if (qty <= 0) return null
+
+  if (serials.length !== qty) return `Jumlah serial ${serials.length} harus sama dengan qty ${qty}`
+
+  const dupes = getDuplicateSerials(serials)
+  if (dupes.length) return `Duplikat: ${dupes.join(', ')}`
+
+  return null
+}
+
+async function focusFirstSerialError(err: unknown) {
+  const response = (err as any)?.response
+  if (!response || response.status !== 422) return
+
+  const errors = response?.data?.errors
+  if (!errors || typeof errors !== 'object') return
+
+  const keys = Object.keys(errors as Record<string, unknown>)
+  const firstLineKey =
+    keys.find((k) => /^lines\.(\d+)\.serial_numbers(\.|$)/.test(k)) ??
+    keys.find((k) => /^lines\.(\d+)\./.test(k))
+  if (!firstLineKey) return
+
+  const match = firstLineKey.match(/^lines\.(\d+)\./)
+  if (!match) return
+
+  const index = Number(match[1])
+  if (!Number.isFinite(index)) return
+
+  await nextTick()
+  const input = serialInputRefs.value[index]
+  const host = (input?.$el ?? null) as HTMLElement | null
+  host?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  input?.focus?.()
 }
 
 function handleLineProductChanged(line: SalesInvoiceLine, pid: unknown) {
@@ -250,6 +319,7 @@ function removeLine(index: number) {
     return
   }
   model.value.lines.splice(index, 1)
+  serialInputRefs.value.splice(index, 1)
 }
 
 // Charges functions
@@ -520,6 +590,7 @@ async function save() {
     clearDirty()
     tabsStore.closeChildTab(props.tabId)
   } catch (err: unknown) {
+    await focusFirstSerialError(err)
     const maybe = err as { response?: { data?: { message?: unknown } }; message?: unknown }
     ElMessage.error(
       String(maybe?.response?.data?.message ?? maybe?.message ?? 'Gagal menyimpan sales invoice'),
@@ -650,12 +721,31 @@ onDeactivated(() => {
               <el-input
                 type="textarea"
                 :rows="2"
+                :ref="(el: any) => setSerialInputRef(scope.$index, el)"
                 :model-value="serialNumbersToText(scope.row.serial_numbers)"
                 @update:model-value="(v: string) => setLineSerialNumbers(scope.row, v)"
                 placeholder="1 serial per baris (opsional)"
               />
-              <div class="text-xs text-[var(--el-text-color-secondary)] mt-1">
-                {{ Array.isArray(scope.row.serial_numbers) ? scope.row.serial_numbers.length : 0 }} serial
+              <div class="mt-1 flex items-center justify-between gap-2">
+                <div class="text-xs text-[var(--el-text-color-secondary)]">
+                  {{ Array.isArray(scope.row.serial_numbers) ? scope.row.serial_numbers.length : 0 }} serial
+                  <span class="ml-2">(opsional)</span>
+                </div>
+                <el-button
+                  v-if="Array.isArray(scope.row.serial_numbers) && scope.row.serial_numbers.length"
+                  size="small"
+                  type="danger"
+                  link
+                  @click="clearLineSerialNumbers(scope.row)"
+                >
+                  Clear
+                </el-button>
+              </div>
+              <div
+                v-if="getSerialWarning(scope.row)"
+                class="text-xs text-[var(--el-color-danger)] mt-1"
+              >
+                {{ getSerialWarning(scope.row) }}
               </div>
             </template>
             <template v-else>
@@ -823,6 +913,41 @@ onDeactivated(() => {
                 <div class="text-sm">Klik "Tambah Biaya" untuk menambahkan biaya atau discount</div>
               </div>
             </div>
+
+            <el-dialog
+              v-model="showAddChargeDialog"
+              title="Tambah Biaya"
+              width="520px"
+              :close-on-click-modal="false"
+            >
+              <div class="space-y-3">
+                <div>
+                  <div class="text-sm mb-1">Deskripsi</div>
+                  <el-input v-model="newCharge.description" placeholder="Mis. biaya admin / ongkir" />
+                </div>
+
+                <div>
+                  <div class="text-sm mb-1">Jumlah</div>
+                  <el-input v-model="newCharge.amount" inputmode="decimal" placeholder="0" />
+                </div>
+
+                <div>
+                  <div class="text-sm mb-1">Kode Akun</div>
+                  <el-input v-model="newCharge.account_code" placeholder="Mis. 6100" />
+                </div>
+
+                <el-checkbox v-model="newCharge.is_discount">Ini discount (nilai mengurangi total)</el-checkbox>
+              </div>
+
+              <template #footer>
+                <div class="flex items-center justify-end gap-2">
+                  <el-button @click="showAddChargeDialog = false">Cancel</el-button>
+                  <el-button type="primary" :disabled="!isEdit || !props.invoiceId" @click="addCharge">
+                    Save
+                  </el-button>
+                </div>
+              </template>
+            </el-dialog>
           </div>
         </el-tab-pane>
 

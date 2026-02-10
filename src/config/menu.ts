@@ -77,6 +77,18 @@ export const MENU_ITEMS: MenuItemConfig[] = [
   },
 
   {
+    id: 'product-serials',
+    title: 'Serial Registry',
+    showSubTabsBar: true,
+    defaultChild: {
+      localId: 'list',
+      title: 'Serial Registry',
+      component: 'ProductSerialsListWorkspace',
+      closable: false,
+    },
+  },
+
+  {
     id: 'product-categories',
     title: 'Product Categories',
     showSubTabsBar: true,

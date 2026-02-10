@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, onActivated, onDeactivated, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onActivated, onDeactivated, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import { listWarehouses, type Warehouse } from '../lib/api/modules/warehouses'
 import { listProducts, type Product } from '../lib/api/modules/products'
+import { listAvailableProductSerialNumbers } from '../lib/api/modules/productSerials'
 import {
   createWarehouseTransfer,
   getWarehouseTransfer,
@@ -52,6 +53,77 @@ function setLineSerialNumbers(line: WarehouseTransferLine, rawText: string) {
   line.serial_numbers = parsed.length ? parsed : undefined
 }
 
+const serialInputRefs = ref<any[]>([])
+
+function setSerialInputRef(index: number, el: any) {
+  if (!el) {
+    serialInputRefs.value[index] = undefined
+    return
+  }
+  serialInputRefs.value[index] = el
+}
+
+function clearLineSerialNumbers(line: WarehouseTransferLine) {
+  line.serial_numbers = undefined
+}
+
+function normalizeSerials(serialNumbers: unknown): string[] {
+  if (!Array.isArray(serialNumbers)) return []
+  return serialNumbers.map((s) => String(s ?? '').trim()).filter(Boolean)
+}
+
+function getDuplicateSerials(serialNumbers: unknown): string[] {
+  const normalized = normalizeSerials(serialNumbers)
+  const counts = new Map<string, number>()
+  for (const s of normalized) counts.set(s, (counts.get(s) ?? 0) + 1)
+  return Array.from(counts.entries())
+    .filter(([, c]) => c > 1)
+    .map(([s]) => s)
+}
+
+function getSerialWarning(line: WarehouseTransferLine): string | null {
+  if (!isSerialTrackedProduct(line.product_id)) return null
+
+  const qty = Number(line.quantity ?? 0)
+  if (!Number.isFinite(qty) || qty <= 0) return null
+
+  const serials = normalizeSerials(line.serial_numbers)
+  if (serials.length < 1) return 'Serial wajib diisi'
+  if (!Number.isInteger(qty)) return 'Quantity harus bilangan bulat'
+  if (serials.length !== qty) return `Jumlah serial ${serials.length} harus sama dengan qty ${qty}`
+
+  const dupes = getDuplicateSerials(serials)
+  if (dupes.length) return `Duplikat: ${dupes.join(', ')}`
+
+  return null
+}
+
+async function focusFirstSerialError(err: unknown) {
+  const response = (err as any)?.response
+  if (!response || response.status !== 422) return
+
+  const errors = response?.data?.errors
+  if (!errors || typeof errors !== 'object') return
+
+  const keys = Object.keys(errors as Record<string, unknown>)
+  const firstLineKey =
+    keys.find((k) => /^lines\.(\d+)\.serial_numbers(\.|$)/.test(k)) ??
+    keys.find((k) => /^lines\.(\d+)\./.test(k))
+  if (!firstLineKey) return
+
+  const match = firstLineKey.match(/^lines\.(\d+)\./)
+  if (!match) return
+
+  const index = Number(match[1])
+  if (!Number.isFinite(index)) return
+
+  await nextTick()
+  const input = serialInputRefs.value[index]
+  const host = (input?.$el ?? null) as HTMLElement | null
+  host?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  input?.focus?.()
+}
+
 function handleLineProductChanged(line: WarehouseTransferLine, pid: unknown) {
   const productId = typeof pid === 'number' ? pid : pid === null || pid === undefined ? null : Number(pid)
   if (!isSerialTrackedProduct(productId)) line.serial_numbers = undefined
@@ -80,6 +152,9 @@ function createEmptyModel(): CreateWarehouseTransferPayload {
 
 const model = ref<CreateWarehouseTransferPayload>(createEmptyModel())
 
+type SerialSuggestion = { value: string }
+const serialQuickAdd = ref<string[]>(model.value.lines.map(() => ''))
+
 watch(
   () => model.value,
   () => {
@@ -91,6 +166,7 @@ watch(
 
 function addLine() {
   model.value.lines.push({ product_id: 0, quantity: 1 })
+  serialQuickAdd.value.push('')
 }
 
 function removeLine(index: number) {
@@ -99,6 +175,61 @@ function removeLine(index: number) {
     return
   }
   model.value.lines.splice(index, 1)
+  serialInputRefs.value.splice(index, 1)
+  serialQuickAdd.value.splice(index, 1)
+}
+
+async function fetchSerialSuggestions(
+  line: WarehouseTransferLine,
+  query: string,
+  cb: (items: SerialSuggestion[]) => void,
+) {
+  if (!model.value.source_warehouse_id || model.value.source_warehouse_id <= 0) {
+    cb([])
+    return
+  }
+
+  if (!line.product_id || line.product_id <= 0) {
+    cb([])
+    return
+  }
+
+  try {
+    const serials = await listAvailableProductSerialNumbers({
+      product_id: line.product_id,
+      warehouse_id: model.value.source_warehouse_id,
+      q: query,
+      limit: 30,
+    })
+    cb(serials.map((s) => ({ value: s })))
+  } catch {
+    cb([])
+  }
+}
+
+function addSerialToLine(line: WarehouseTransferLine, serial: string) {
+  const s = String(serial ?? '').trim()
+  if (!s) return
+
+  const current = normalizeSerials(line.serial_numbers)
+  if (current.includes(s)) {
+    ElMessage.warning('Serial sudah ada di line ini')
+    return
+  }
+
+  current.push(s)
+  line.serial_numbers = current
+}
+
+function addSerialFromQuickAdd(line: WarehouseTransferLine, index: number, value?: string) {
+  const raw = String(value ?? serialQuickAdd.value[index] ?? '').trim()
+  if (!raw) return
+  addSerialToLine(line, raw)
+  serialQuickAdd.value[index] = ''
+}
+
+function onSerialSuggestionSelected(line: WarehouseTransferLine, index: number, item: SerialSuggestion) {
+  addSerialFromQuickAdd(line, index, item?.value)
 }
 
 async function load() {
@@ -131,6 +262,8 @@ async function load() {
       if (!model.value.lines.length) model.value.lines = createEmptyModel().lines
     }
 
+    serialQuickAdd.value = model.value.lines.map(() => '')
+
     loaded.value = true
     clearDirty()
   } catch (err: unknown) {
@@ -146,6 +279,7 @@ function resetForCreateOnClose() {
   saving.value = false
   loading.value = false
   model.value = createEmptyModel()
+  serialQuickAdd.value = model.value.lines.map(() => '')
   clearDirty()
 }
 
@@ -254,6 +388,7 @@ async function save() {
     ElMessage.success('Saved')
     tabsStore.closeChildTab(props.tabId)
   } catch (err: unknown) {
+    await focusFirstSerialError(err)
     const maybe = err as { response?: { data?: { message?: unknown } }; message?: unknown }
     ElMessage.error(String(maybe?.response?.data?.message ?? maybe?.message ?? 'Gagal menyimpan warehouse transfer'))
   } finally {
@@ -342,15 +477,49 @@ onDeactivated(() => {
         <el-table-column label="Serial Numbers" min-width="260">
           <template #default="scope">
             <template v-if="isSerialTrackedProduct(scope.row.product_id)">
+              <div class="flex items-center gap-2 mb-2">
+                <el-autocomplete
+                  v-model="serialQuickAdd[scope.$index]"
+                  class="w-full"
+                  :fetch-suggestions="(q: string, cb: any) => fetchSerialSuggestions(scope.row, q, cb)"
+                  :trigger-on-focus="true"
+                  :debounce="250"
+                  placeholder="Cari serial available (source warehouse)"
+                  :disabled="!model.source_warehouse_id || !scope.row.product_id"
+                  @select="(item: any) => onSerialSuggestionSelected(scope.row, scope.$index, item)"
+                />
+                <el-button
+                  size="small"
+                  :disabled="!model.source_warehouse_id || !scope.row.product_id || !String(serialQuickAdd[scope.$index] ?? '').trim()"
+                  @click="addSerialFromQuickAdd(scope.row, scope.$index)"
+                >
+                  Add
+                </el-button>
+              </div>
               <el-input
                 type="textarea"
                 :rows="2"
+                :ref="(el: any) => setSerialInputRef(scope.$index, el)"
                 :model-value="serialNumbersToText(scope.row.serial_numbers)"
                 @update:model-value="(v: string) => setLineSerialNumbers(scope.row, v)"
                 placeholder="1 serial per baris (wajib)"
               />
-              <div class="text-xs text-[var(--el-text-color-secondary)] mt-1">
-                {{ Array.isArray(scope.row.serial_numbers) ? scope.row.serial_numbers.length : 0 }} serial
+              <div class="mt-1 flex items-center justify-between gap-2">
+                <div class="text-xs text-[var(--el-text-color-secondary)]">
+                  {{ Array.isArray(scope.row.serial_numbers) ? scope.row.serial_numbers.length : 0 }} / {{ Number(scope.row.quantity ?? 0) || 0 }}
+                </div>
+                <el-button
+                  v-if="Array.isArray(scope.row.serial_numbers) && scope.row.serial_numbers.length"
+                  size="small"
+                  type="danger"
+                  link
+                  @click="clearLineSerialNumbers(scope.row)"
+                >
+                  Clear
+                </el-button>
+              </div>
+              <div v-if="getSerialWarning(scope.row)" class="text-xs text-[var(--el-color-danger)] mt-1">
+                {{ getSerialWarning(scope.row) }}
               </div>
             </template>
             <template v-else>

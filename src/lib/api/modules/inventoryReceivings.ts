@@ -28,6 +28,10 @@ export type InventoryReceiving = {
   created_by: number
   posted_by: number | null
   posted_at: string | null
+  serial_required_qty?: string | number
+  serial_captured_qty?: string | number
+  serial_is_required?: boolean | number
+  serial_is_complete?: boolean | number
   lines?: InventoryReceivingLine[]
 }
 

@@ -13,6 +13,20 @@ const loading = ref(false)
 const errorMessage = ref<string | null>(null)
 const rows = ref<WarehouseTransfer[]>([])
 
+function isSerialRequired(row: WarehouseTransfer): boolean {
+  return Boolean(row.serial_is_required)
+}
+
+function isSerialComplete(row: WarehouseTransfer): boolean {
+  return Boolean(row.serial_is_complete)
+}
+
+function serialBadgeLabel(row: WarehouseTransfer): string {
+  const req = Number(row.serial_required_qty ?? 0)
+  const cap = Number(row.serial_captured_qty ?? 0)
+  return `${cap}/${req}`
+}
+
 async function load() {
   loading.value = true
   errorMessage.value = null
@@ -98,6 +112,19 @@ onMounted(() => {
       </el-table-column>
       <el-table-column prop="source_warehouse_id" label="Source" width="120" />
       <el-table-column prop="destination_warehouse_id" label="Destination" width="120" />
+      <el-table-column label="Serial" width="170">
+        <template #default="scope">
+          <div v-if="isSerialRequired(scope.row)">
+            <el-tag :type="isSerialComplete(scope.row) ? 'success' : 'danger'">
+              {{ isSerialComplete(scope.row) ? 'Serial OK' : 'Serial incomplete' }}
+            </el-tag>
+            <span class="ml-2 text-xs text-[var(--el-text-color-secondary)]">
+              {{ serialBadgeLabel(scope.row) }}
+            </span>
+          </div>
+          <div v-else class="text-xs text-[var(--el-text-color-secondary)]">-</div>
+        </template>
+      </el-table-column>
       <el-table-column prop="description" label="Description" min-width="240" />
     </el-table>
 
