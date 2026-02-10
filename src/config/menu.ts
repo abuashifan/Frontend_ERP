@@ -29,6 +29,18 @@ export const MENU_ITEMS: MenuItemConfig[] = [
   },
 
   {
+    id: 'company-settings',
+    title: 'Company Settings',
+    showSubTabsBar: false,
+    defaultChild: {
+      localId: 'main',
+      title: 'Company Settings',
+      component: 'CompanySettingsWorkspace',
+      closable: false,
+    },
+  },
+
+  {
     id: 'customers',
     title: 'Customers',
     showSubTabsBar: true,
@@ -111,11 +123,7 @@ export const MENU_ITEMS: MenuItemConfig[] = [
     defaultChild: {
       localId: 'list',
       title: 'Journals',
-      component: 'PlaceholderWorkspace',
-      props: {
-        title: 'Journals',
-        description: 'Planned: journal list/detail/form (read-only) for Phase 7.2.',
-      },
+      component: 'JournalsListWorkspace',
       closable: false,
     },
   },

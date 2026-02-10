@@ -53,3 +53,24 @@ export async function setupCompany(payload: SetupCompanyPayload) {
   const res = await api.post<SetupCompanyResponse>('/system/setup/company', payload)
   return res.data
 }
+
+export type EnsurePeriodsResponse = {
+  data: {
+    company_id: number
+    timezone: string
+    window: {
+      years_back: number
+      years_forward: number
+    }
+    inserted: number
+    skipped_existing: number
+  }
+}
+
+export async function ensureAccountingPeriods(yearsBack = 1, yearsForward = 1) {
+  const res = await api.post<EnsurePeriodsResponse>('/system/company/periods/ensure', {
+    years_back: yearsBack,
+    years_forward: yearsForward,
+  })
+  return res.data
+}

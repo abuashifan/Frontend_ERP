@@ -38,6 +38,7 @@ const products = ref<Product[]>([])
 const warehouses = ref<Warehouse[]>([])
 const notes = ref('')
 const discountAmount = ref<string>('')
+const autoPostOnCreate = ref(true)
 
 const activeSectionTab = ref<'detail' | 'down_payment' | 'info' | 'charges' | 'docs'>('detail')
 
@@ -69,6 +70,33 @@ function isFocused(key: string) {
 const productsById = computed(() => {
   return new Map(products.value.map((p) => [p.id, p]))
 })
+
+function isSerialTrackedProduct(productId: number | null | undefined): boolean {
+  if (!productId) return false
+  return Boolean(productsById.value.get(productId)?.use_serial_number)
+}
+
+function parseSerialNumbersInput(input: string): string[] {
+  return input
+    .split(/[\n,;]+/g)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+}
+
+function serialNumbersToText(serialNumbers: unknown): string {
+  if (!Array.isArray(serialNumbers)) return ''
+  return serialNumbers.map((s) => String(s ?? '').trim()).filter(Boolean).join('\n')
+}
+
+function setLineSerialNumbers(line: SalesInvoiceLine, rawText: string) {
+  const parsed = parseSerialNumbersInput(rawText)
+  line.serial_numbers = parsed.length ? parsed : undefined
+}
+
+function handleLineProductChanged(line: SalesInvoiceLine, pid: unknown) {
+  const productId = typeof pid === 'number' ? pid : pid === null || pid === undefined ? null : Number(pid)
+  if (!isSerialTrackedProduct(productId)) line.serial_numbers = undefined
+}
 
 const canChooseProduct = computed(() => {
   return model.value.customer_id > 0 && Boolean(model.value.invoice_number?.trim())
@@ -128,13 +156,21 @@ function setTaxInput(value: string) {
   model.value.tax_amount = moneyInputParser(value)
 }
 
+function todayLocalYmd(): string {
+  const d = new Date()
+  const yyyy = String(d.getFullYear())
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 function createEmptyModel(): CreateSalesInvoicePayload {
   return {
     customer_id: 0,
     warehouse_id: null,
     invoice_number: '',
-    invoice_date: new Date().toISOString().slice(0, 10),
-    due_date: new Date().toISOString().slice(0, 10),
+    invoice_date: todayLocalYmd(),
+    due_date: todayLocalYmd(),
     currency_code: 'IDR',
     exchange_rate: 1,
     tax_amount: '',
@@ -145,6 +181,7 @@ function createEmptyModel(): CreateSalesInvoicePayload {
         qty: 1,
         unit_price: '',
         tax_id: null,
+        serial_numbers: undefined,
       },
     ],
   }
@@ -203,6 +240,7 @@ function addLine() {
     qty: 1,
     unit_price: '',
     tax_id: null,
+    serial_numbers: undefined,
   })
 }
 
@@ -323,6 +361,7 @@ async function load() {
           qty: Math.trunc(parseMoney(l.qty)),
           unit_price: String(parseMoney(l.unit_price)),
           tax_id: l.tax_id ?? null,
+          serial_numbers: Array.isArray(l.serials) ? l.serials.map((s) => String(s.serial_number)) : undefined,
         })),
       }
 
@@ -414,6 +453,35 @@ async function save() {
         ElMessage.warning(`Line ${i + 1}: unit price harus > 0`)
         return
       }
+
+      const serialTracked = isSerialTrackedProduct(line.product_id)
+      const serials = Array.isArray(line.serial_numbers) ? line.serial_numbers : []
+      const normalizedSerials = serials.map((s) => String(s ?? '').trim()).filter(Boolean)
+
+      if (!serialTracked && normalizedSerials.length > 0) {
+        ElMessage.warning(`Line ${i + 1}: serial numbers hanya untuk product yang memakai serial`)
+        return
+      }
+
+      // Sales Invoice: serial numbers optional even for serial-tracked products.
+      // If user filled them, enforce the same rules as backend.
+      if (normalizedSerials.length > 0) {
+        if (!Number.isInteger(qty)) {
+          ElMessage.warning(`Line ${i + 1}: qty harus bilangan bulat jika input serial numbers`)
+          return
+        }
+
+        if (normalizedSerials.length !== qty) {
+          ElMessage.warning(`Line ${i + 1}: jumlah serial numbers harus sama dengan qty`)
+          return
+        }
+
+        const unique = new Set(normalizedSerials)
+        if (unique.size !== normalizedSerials.length) {
+          ElMessage.warning(`Line ${i + 1}: serial numbers tidak boleh duplikat`)
+          return
+        }
+      }
     }
 
     // Normalisasi angka sebelum submit (hindari format dengan koma: "10,000.00")
@@ -430,6 +498,10 @@ async function save() {
           String(l.description ?? ''),
         qty: Math.trunc(parseMoney(l.qty)),
         unit_price: parseMoney(l.unit_price),
+        serial_numbers:
+          isSerialTrackedProduct(l.product_id) && Array.isArray(l.serial_numbers) && l.serial_numbers.length
+            ? l.serial_numbers
+            : undefined,
       })),
     }
 
@@ -437,8 +509,12 @@ async function save() {
       await updateSalesInvoice(props.invoiceId, payload)
       ElMessage.success('Sales invoice updated')
     } else {
-      await createSalesInvoice(payload)
-      ElMessage.success('Sales invoice created')
+      const created = await createSalesInvoice(payload, autoPostOnCreate.value)
+      if (autoPostOnCreate.value && created.posted_at) {
+        ElMessage.success('Sales invoice created & posted')
+      } else {
+        ElMessage.success('Sales invoice created')
+      }
     }
 
     clearDirty()
@@ -483,7 +559,15 @@ onDeactivated(() => {
         <el-tag v-if="dirty" type="warning">Unsaved</el-tag>
         <el-tag v-else type="success">Saved</el-tag>
       </div>
-      <el-button type="primary" :loading="saving" @click="save">Save</el-button>
+      <div class="flex items-center gap-3">
+        <el-switch
+          v-if="!isEdit"
+          v-model="autoPostOnCreate"
+          active-text="Auto post"
+          inactive-text="Draft"
+        />
+        <el-button type="primary" :loading="saving" @click="save">Save</el-button>
+      </div>
     </div>
 
     <el-skeleton v-if="loading" rows="8" animated />
@@ -548,6 +632,7 @@ onDeactivated(() => {
               class="w-full"
               :disabled="!canChooseProduct"
               :placeholder="canChooseProduct ? 'Select' : 'Isi customer & invoice number dulu'"
+              @change="handleLineProductChanged(scope.row, $event)"
             >
               <el-option
                 v-for="p in products"
@@ -556,6 +641,26 @@ onDeactivated(() => {
                 :value="p.id"
               />
             </el-select>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="Serial Numbers" min-width="240">
+          <template #default="scope">
+            <template v-if="isSerialTrackedProduct(scope.row.product_id)">
+              <el-input
+                type="textarea"
+                :rows="2"
+                :model-value="serialNumbersToText(scope.row.serial_numbers)"
+                @update:model-value="(v: string) => setLineSerialNumbers(scope.row, v)"
+                placeholder="1 serial per baris (opsional)"
+              />
+              <div class="text-xs text-[var(--el-text-color-secondary)] mt-1">
+                {{ Array.isArray(scope.row.serial_numbers) ? scope.row.serial_numbers.length : 0 }} serial
+              </div>
+            </template>
+            <template v-else>
+              <div class="text-xs text-[var(--el-text-color-secondary)]">-</div>
+            </template>
           </template>
         </el-table-column>
 

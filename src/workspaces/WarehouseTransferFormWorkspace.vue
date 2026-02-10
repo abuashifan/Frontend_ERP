@@ -28,6 +28,35 @@ const loaded = ref(false)
 const warehouses = ref<Warehouse[]>([])
 const products = ref<Product[]>([])
 
+const productsById = computed(() => new Map(products.value.map((p) => [p.id, p])))
+
+function isSerialTrackedProduct(productId: number | null | undefined): boolean {
+  if (!productId) return false
+  return Boolean(productsById.value.get(productId)?.use_serial_number)
+}
+
+function parseSerialNumbersInput(input: string): string[] {
+  return input
+    .split(/[\n,;]+/g)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+}
+
+function serialNumbersToText(serialNumbers: unknown): string {
+  if (!Array.isArray(serialNumbers)) return ''
+  return serialNumbers.map((s) => String(s ?? '').trim()).filter(Boolean).join('\n')
+}
+
+function setLineSerialNumbers(line: WarehouseTransferLine, rawText: string) {
+  const parsed = parseSerialNumbersInput(rawText)
+  line.serial_numbers = parsed.length ? parsed : undefined
+}
+
+function handleLineProductChanged(line: WarehouseTransferLine, pid: unknown) {
+  const productId = typeof pid === 'number' ? pid : pid === null || pid === undefined ? null : Number(pid)
+  if (!isSerialTrackedProduct(productId)) line.serial_numbers = undefined
+}
+
 function today(): string {
   return new Date().toISOString().slice(0, 10)
 }
@@ -43,6 +72,7 @@ function createEmptyModel(): CreateWarehouseTransferPayload {
       {
         product_id: 0,
         quantity: 1,
+        serial_numbers: undefined,
       },
     ],
   }
@@ -94,6 +124,7 @@ async function load() {
           id: l.id,
           product_id: l.product_id,
           quantity: l.quantity,
+          serial_numbers: Array.isArray(l.serials) ? l.serials.map((s) => String(s.serial_number)) : undefined,
         })),
       }
 
@@ -163,16 +194,60 @@ async function save() {
         ElMessage.warning(`Line ${idx + 1}: quantity wajib > 0`)
         return
       }
+
+      const serialTracked = isSerialTrackedProduct(line.product_id)
+      const serials = Array.isArray(line.serial_numbers) ? line.serial_numbers : []
+      const normalizedSerials = serials.map((s) => String(s ?? '').trim()).filter(Boolean)
+
+      if (!serialTracked && normalizedSerials.length > 0) {
+        ElMessage.warning(`Line ${idx + 1}: serial numbers hanya untuk product yang memakai serial`)
+        return
+      }
+
+      if (serialTracked) {
+        if (!Number.isInteger(qty)) {
+          ElMessage.warning(`Line ${idx + 1}: quantity harus bilangan bulat untuk product serial`)
+          return
+        }
+
+        if (normalizedSerials.length < 1) {
+          ElMessage.warning(`Line ${idx + 1}: serial numbers wajib diisi untuk product serial`)
+          return
+        }
+
+        if (normalizedSerials.length !== qty) {
+          ElMessage.warning(`Line ${idx + 1}: jumlah serial numbers harus sama dengan quantity`)
+          return
+        }
+
+        const unique = new Set(normalizedSerials)
+        if (unique.size !== normalizedSerials.length) {
+          ElMessage.warning(`Line ${idx + 1}: serial numbers tidak boleh duplikat`)
+          return
+        }
+      }
+    }
+
+    const payload: CreateWarehouseTransferPayload = {
+      ...model.value,
+      lines: model.value.lines.map((l) => ({
+        product_id: l.product_id,
+        quantity: l.quantity,
+        serial_numbers:
+          isSerialTrackedProduct(l.product_id) && Array.isArray(l.serial_numbers) && l.serial_numbers.length
+            ? l.serial_numbers
+            : undefined,
+      })),
     }
 
     if (isCreate.value) {
-      await createWarehouseTransfer(model.value)
+      await createWarehouseTransfer(payload)
     } else {
       if (!props.transferId) {
         ElMessage.error('transferId tidak ditemukan')
         return
       }
-      await updateWarehouseTransfer(props.transferId, model.value)
+      await updateWarehouseTransfer(props.transferId, payload)
     }
 
     clearDirty()
@@ -253,9 +328,34 @@ onDeactivated(() => {
 
         <el-table-column label="Product" min-width="280">
           <template #default="scope">
-            <el-select v-model="scope.row.product_id" filterable class="w-full">
+            <el-select
+              v-model="scope.row.product_id"
+              filterable
+              class="w-full"
+              @change="handleLineProductChanged(scope.row, $event)"
+            >
               <el-option v-for="p in products" :key="p.id" :label="`${p.code} — ${p.name}`" :value="p.id" />
             </el-select>
+          </template>
+        </el-table-column>
+
+        <el-table-column label="Serial Numbers" min-width="260">
+          <template #default="scope">
+            <template v-if="isSerialTrackedProduct(scope.row.product_id)">
+              <el-input
+                type="textarea"
+                :rows="2"
+                :model-value="serialNumbersToText(scope.row.serial_numbers)"
+                @update:model-value="(v: string) => setLineSerialNumbers(scope.row, v)"
+                placeholder="1 serial per baris (wajib)"
+              />
+              <div class="text-xs text-[var(--el-text-color-secondary)] mt-1">
+                {{ Array.isArray(scope.row.serial_numbers) ? scope.row.serial_numbers.length : 0 }} serial
+              </div>
+            </template>
+            <template v-else>
+              <div class="text-xs text-[var(--el-text-color-secondary)]">-</div>
+            </template>
           </template>
         </el-table-column>
 
