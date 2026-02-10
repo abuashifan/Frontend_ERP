@@ -73,17 +73,30 @@ export async function getVendorInvoice(id: number): Promise<VendorInvoice> {
   return unwrapData<VendorInvoice>(res.data)
 }
 
-export async function createVendorInvoice(payload: CreateVendorInvoicePayload): Promise<VendorInvoice> {
+export async function createVendorInvoice(
+  payload: CreateVendorInvoicePayload,
+  autoPost: boolean | undefined = undefined,
+): Promise<VendorInvoice> {
   const tenantStore = useTenantStore()
   if (!tenantStore.activeCompanyId) throw new Error('company_id belum diset')
 
-  const body = {
+  const body: any = {
     ...payload,
     company_id: Number(tenantStore.activeCompanyId),
   }
 
-  const res: AxiosResponse<ApiEnvelope<VendorInvoice>> = await api.post('/vendor-invoices', body)
-  return unwrapData<VendorInvoice>(res.data)
+  if (autoPost !== undefined) {
+    body.auto_post = Boolean(autoPost)
+  }
+
+  const res: AxiosResponse<ApiEnvelope<unknown>> = await api.post('/vendor-invoices', body)
+  const data = unwrapData<unknown>(res.data)
+
+  if (data && typeof data === 'object' && 'invoice' in (data as any)) {
+    return (data as any).invoice as VendorInvoice
+  }
+
+  return data as VendorInvoice
 }
 
 export async function updateVendorInvoice(

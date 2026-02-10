@@ -63,17 +63,28 @@ export async function getVendorPayment(id: number): Promise<VendorPayment> {
   return unwrapData<VendorPayment>(res.data)
 }
 
-export async function createVendorPayment(payload: CreateVendorPaymentPayload): Promise<VendorPayment> {
+export async function createVendorPayment(
+  payload: CreateVendorPaymentPayload,
+  autoPost: boolean | undefined = undefined,
+): Promise<VendorPayment> {
   const tenantStore = useTenantStore()
   if (!tenantStore.activeCompanyId) throw new Error('company_id belum diset')
 
-  const body = {
+  const body: any = {
     ...payload,
     company_id: Number(tenantStore.activeCompanyId),
   }
 
-  const res: AxiosResponse<ApiEnvelope<VendorPayment>> = await api.post('/vendor-payments', body)
-  return unwrapData<VendorPayment>(res.data)
+  if (autoPost !== undefined) {
+    body.auto_post = Boolean(autoPost)
+  }
+
+  const res: AxiosResponse<ApiEnvelope<unknown>> = await api.post('/vendor-payments', body)
+  const data = unwrapData<unknown>(res.data)
+  if (data && typeof data === 'object' && 'payment' in (data as any)) {
+    return (data as any).payment as VendorPayment
+  }
+  return data as VendorPayment
 }
 
 export async function updateVendorPayment(

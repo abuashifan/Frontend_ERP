@@ -26,6 +26,8 @@ const loading = ref(false)
 const saving = ref(false)
 const loaded = ref(false)
 
+const autoPostOnCreate = ref(true)
+
 const warehouses = ref<Warehouse[]>([])
 const products = ref<Product[]>([])
 
@@ -375,7 +377,7 @@ async function save() {
     }
 
     if (isCreate.value) {
-      await createWarehouseTransfer(payload)
+      await createWarehouseTransfer(payload, autoPostOnCreate.value)
     } else {
       if (!props.transferId) {
         ElMessage.error('transferId tidak ditemukan')
@@ -419,7 +421,13 @@ onDeactivated(() => {
         <div class="text-lg font-semibold">{{ isCreate ? 'New Warehouse Transfer' : 'Edit Warehouse Transfer' }}</div>
         <el-tag :type="dirty ? 'warning' : 'success'">{{ dirty ? 'Unsaved' : 'Saved' }}</el-tag>
       </div>
-      <el-button type="primary" :loading="saving" @click="save">Save</el-button>
+      <div class="flex items-center gap-3">
+        <div v-if="isCreate" class="flex items-center gap-2">
+          <span class="text-sm text-gray-600">Auto post</span>
+          <el-switch v-model="autoPostOnCreate" />
+        </div>
+        <el-button type="primary" :loading="saving" @click="save">Save</el-button>
+      </div>
     </div>
 
     <el-skeleton v-if="loading" rows="8" animated />

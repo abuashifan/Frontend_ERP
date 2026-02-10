@@ -67,13 +67,18 @@ export async function getInventoryReceiving(id: number): Promise<InventoryReceiv
 
 export async function createInventoryReceiving(
   payload: CreateInventoryReceivingPayload,
+  autoPost: boolean | undefined = undefined,
 ): Promise<InventoryReceiving> {
   const tenantStore = useTenantStore()
   if (!tenantStore.activeCompanyId) throw new Error('company_id belum diset')
 
-  const body = {
+  const body: any = {
     ...payload,
     company_id: Number(tenantStore.activeCompanyId),
+  }
+
+  if (autoPost !== undefined) {
+    body.auto_post = Boolean(autoPost)
   }
 
   const res: AxiosResponse<unknown> = await api.post('/inventory-receivings', body)

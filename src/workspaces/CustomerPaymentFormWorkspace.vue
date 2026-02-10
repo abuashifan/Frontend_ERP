@@ -25,6 +25,8 @@ const loading = ref(false)
 const saving = ref(false)
 const loaded = ref(false)
 
+const autoPostOnCreate = ref(true)
+
 const customers = ref<Customer[]>([])
 const salesInvoices = ref<SalesInvoice[]>([])
 
@@ -195,7 +197,7 @@ async function save() {
       }
       await updateCustomerPayment(props.customerPaymentId, model.value)
     } else {
-      await createCustomerPayment(model.value)
+      await createCustomerPayment(model.value, autoPostOnCreate.value)
     }
 
     clearDirty()
@@ -233,7 +235,13 @@ onDeactivated(() => {
         <el-tag v-if="dirty" type="warning">Unsaved</el-tag>
         <el-tag v-else type="success">Saved</el-tag>
       </div>
-      <el-button type="primary" :loading="saving" @click="save">Save</el-button>
+      <div class="flex items-center gap-3">
+        <div v-if="!isEdit" class="flex items-center gap-2">
+          <span class="text-sm text-gray-600">Auto post</span>
+          <el-switch v-model="autoPostOnCreate" />
+        </div>
+        <el-button type="primary" :loading="saving" @click="save">Save</el-button>
+      </div>
     </div>
 
     <el-skeleton v-if="loading" rows="8" animated />

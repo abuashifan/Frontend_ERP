@@ -56,8 +56,16 @@ export async function getWarehouseTransfer(id: number): Promise<WarehouseTransfe
   return unwrapData<WarehouseTransfer>(res.data)
 }
 
-export async function createWarehouseTransfer(payload: CreateWarehouseTransferPayload): Promise<WarehouseTransfer> {
-  const res: AxiosResponse<unknown> = await api.post('/warehouse-transfers', payload)
+export async function createWarehouseTransfer(
+  payload: CreateWarehouseTransferPayload,
+  autoPost: boolean | undefined = undefined,
+): Promise<WarehouseTransfer> {
+  const body: any = { ...payload }
+  if (autoPost !== undefined) {
+    body.auto_post = Boolean(autoPost)
+  }
+
+  const res: AxiosResponse<unknown> = await api.post('/warehouse-transfers', body)
   return unwrapData<WarehouseTransfer>(res.data)
 }
 

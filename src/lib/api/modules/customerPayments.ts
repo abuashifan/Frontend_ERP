@@ -63,17 +63,28 @@ export async function getCustomerPayment(id: number): Promise<CustomerPayment> {
   return unwrapData<CustomerPayment>(res.data)
 }
 
-export async function createCustomerPayment(payload: CreateCustomerPaymentPayload): Promise<CustomerPayment> {
+export async function createCustomerPayment(
+  payload: CreateCustomerPaymentPayload,
+  autoPost: boolean | undefined = undefined,
+): Promise<CustomerPayment> {
   const tenantStore = useTenantStore()
   if (!tenantStore.activeCompanyId) throw new Error('company_id belum diset')
 
-  const body = {
+  const body: any = {
     ...payload,
     company_id: Number(tenantStore.activeCompanyId),
   }
 
-  const res: AxiosResponse<ApiEnvelope<CustomerPayment>> = await api.post('/customer-payments', body)
-  return unwrapData<CustomerPayment>(res.data)
+  if (autoPost !== undefined) {
+    body.auto_post = Boolean(autoPost)
+  }
+
+  const res: AxiosResponse<ApiEnvelope<unknown>> = await api.post('/customer-payments', body)
+  const data = unwrapData<unknown>(res.data)
+  if (data && typeof data === 'object' && 'payment' in (data as any)) {
+    return (data as any).payment as CustomerPayment
+  }
+  return data as CustomerPayment
 }
 
 export async function updateCustomerPayment(

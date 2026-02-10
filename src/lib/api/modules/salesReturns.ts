@@ -64,13 +64,20 @@ export async function getSalesReturn(id: number): Promise<SalesReturn> {
   return unwrapData<SalesReturn>(res.data)
 }
 
-export async function createSalesReturn(payload: CreateSalesReturnPayload): Promise<SalesReturn> {
+export async function createSalesReturn(
+  payload: CreateSalesReturnPayload,
+  autoPost: boolean | undefined = undefined,
+): Promise<SalesReturn> {
   const tenantStore = useTenantStore()
   if (!tenantStore.activeCompanyId) throw new Error('company_id belum diset')
 
-  const body = {
+  const body: any = {
     ...payload,
     company_id: Number(tenantStore.activeCompanyId),
+  }
+
+  if (autoPost !== undefined) {
+    body.auto_post = Boolean(autoPost)
   }
 
   const res: AxiosResponse<ApiEnvelope<SalesReturn>> = await api.post('/sales-returns', body)

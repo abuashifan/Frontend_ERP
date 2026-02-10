@@ -26,6 +26,8 @@ const loading = ref(false)
 const saving = ref(false)
 const loaded = ref(false)
 
+const autoPostOnCreate = ref(true)
+
 const customers = ref<Customer[]>([])
 const salesInvoices = ref<SalesInvoice[]>([])
 const warehouses = ref<Warehouse[]>([])
@@ -207,7 +209,7 @@ async function save() {
       }
     }
 
-    await createSalesReturn(model.value)
+    await createSalesReturn(model.value, autoPostOnCreate.value)
 
     clearDirty()
     ElMessage.success('Saved')
@@ -243,7 +245,13 @@ onDeactivated(() => {
         <div class="text-lg font-semibold">{{ isCreate ? 'New Sales Return' : 'Sales Return' }}</div>
         <el-tag v-if="isCreate" :type="dirty ? 'warning' : 'success'">{{ dirty ? 'Unsaved' : 'Saved' }}</el-tag>
       </div>
-      <el-button v-if="isCreate" type="primary" :loading="saving" @click="save">Save</el-button>
+      <div v-if="isCreate" class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-gray-600">Auto post</span>
+          <el-switch v-model="autoPostOnCreate" />
+        </div>
+        <el-button type="primary" :loading="saving" @click="save">Save</el-button>
+      </div>
     </div>
 
     <el-skeleton v-if="loading" rows="8" animated />

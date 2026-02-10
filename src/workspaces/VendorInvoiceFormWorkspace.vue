@@ -26,6 +26,8 @@ const loading = ref(false)
 const saving = ref(false)
 const loaded = ref(false)
 
+const autoPostOnCreate = ref(true)
+
 const vendors = ref<Vendor[]>([])
 const products = ref<Product[]>([])
 const purchaseOrders = ref<PurchaseOrder[]>([])
@@ -205,7 +207,7 @@ async function save() {
       }
       await updateVendorInvoice(props.vendorInvoiceId, model.value)
     } else {
-      await createVendorInvoice(model.value)
+      await createVendorInvoice(model.value, autoPostOnCreate.value)
     }
 
     clearDirty()
@@ -243,7 +245,13 @@ onDeactivated(() => {
         <el-tag v-if="dirty" type="warning">Unsaved</el-tag>
         <el-tag v-else type="success">Saved</el-tag>
       </div>
-      <el-button type="primary" :loading="saving" @click="save">Save</el-button>
+      <div class="flex items-center gap-3">
+        <div v-if="!isEdit" class="flex items-center gap-2">
+          <span class="text-sm text-gray-600">Auto post</span>
+          <el-switch v-model="autoPostOnCreate" />
+        </div>
+        <el-button type="primary" :loading="saving" @click="save">Save</el-button>
+      </div>
     </div>
 
     <el-skeleton v-if="loading" rows="8" animated />
