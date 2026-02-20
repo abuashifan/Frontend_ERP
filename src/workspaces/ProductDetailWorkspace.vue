@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import { getProduct, type Product } from '../lib/api/modules/products'
@@ -7,6 +7,10 @@ import { listProductUnits, type ProductUnit } from '../lib/api/modules/productUn
 import { listWarehouses, type Warehouse } from '../lib/api/modules/warehouses'
 import { listVendors, type Vendor } from '../lib/api/modules/vendors'
 import { listChartOfAccounts, type ChartOfAccount } from '../lib/api/modules/chartOfAccounts'
+import {
+  getProductInventoryMovements,
+  type ProductInventoryMovementRow,
+} from '../lib/api/modules/inventoryMovements'
 import { useTabsStore } from '../stores/tabs'
 
 const props = defineProps<{ tabId: string; productId: number }>()
@@ -16,6 +20,12 @@ const tabsStore = useTabsStore()
 const loading = ref(false)
 const loadingLookups = ref(false)
 const errorMessage = ref<string | null>(null)
+
+const activeTab = ref<'detail' | 'inventory-movement'>('detail')
+
+const loadingMovements = ref(false)
+const movementErrorMessage = ref<string | null>(null)
+const movementRows = ref<ProductInventoryMovementRow[]>([])
 
 const product = ref<Product | null>(null)
 const units = ref<ProductUnit[]>([])
@@ -99,6 +109,23 @@ async function load() {
   }
 }
 
+async function loadMovements() {
+  loadingMovements.value = true
+  movementErrorMessage.value = null
+
+  try {
+    const res = await getProductInventoryMovements(props.productId)
+    movementRows.value = res.data
+  } catch (err: unknown) {
+    const maybe = err as { response?: { data?: { message?: unknown } }; message?: unknown }
+    const message = maybe?.response?.data?.message ?? maybe?.message ?? 'Gagal memuat inventory movement'
+    movementErrorMessage.value = String(message)
+    ElMessage.error(movementErrorMessage.value)
+  } finally {
+    loadingMovements.value = false
+  }
+}
+
 function openEdit() {
   if (!product.value) return
 
@@ -131,6 +158,15 @@ onMounted(() => {
   void loadLookups()
   void load()
 })
+
+watch(
+  () => activeTab.value,
+  (tab) => {
+    if (tab === 'inventory-movement' && movementRows.value.length === 0 && !loadingMovements.value) {
+      void loadMovements()
+    }
+  },
+)
 </script>
 
 <template>
@@ -160,137 +196,161 @@ onMounted(() => {
 
     <el-alert v-if="errorMessage" type="error" :title="errorMessage" show-icon class="mb-3" />
 
-    <div v-loading="loading">
-      <div v-if="product" class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <el-card shadow="never">
-          <template #header>
-            <div class="font-semibold">General</div>
-          </template>
-
-          <el-descriptions :column="1" border>
-            <el-descriptions-item label="Code">{{ product.code }}</el-descriptions-item>
-            <el-descriptions-item label="Name">{{ product.name }}</el-descriptions-item>
-            <el-descriptions-item label="Type">{{ typeLabel(product.type) }}</el-descriptions-item>
-            <el-descriptions-item label="Category">{{ product.category_name ?? '-' }}</el-descriptions-item>
-            <el-descriptions-item label="UoM">{{ product.uom }}</el-descriptions-item>
-            <el-descriptions-item label="On Hand">
-              {{ product.on_hand_qty ?? '0' }}
-            </el-descriptions-item>
-            <el-descriptions-item label="Active">
-              <el-tag :type="yesNoTagType(product.is_active)">{{ product.is_active ? 'Yes' : 'No' }}</el-tag>
-            </el-descriptions-item>
-          </el-descriptions>
-        </el-card>
-
-        <el-card shadow="never">
-          <template #header>
-            <div class="font-semibold">Inventory & Serial</div>
-          </template>
-
-          <el-descriptions :column="1" border>
-            <el-descriptions-item label="Use Serial">
-              <el-tag :type="yesNoTagType(product.use_serial_number)">
-                {{ product.use_serial_number ? 'Yes' : 'No' }}
-              </el-tag>
-            </el-descriptions-item>
-            <el-descriptions-item label="Default Warehouse">
-              {{ labelWarehouse(product.default_warehouse_id ?? null) }}
-            </el-descriptions-item>
-            <el-descriptions-item label="Inventory Type">{{ product.inventory_type ?? '-' }}</el-descriptions-item>
-            <el-descriptions-item label="Tax Code">{{ product.tax_code ?? '-' }}</el-descriptions-item>
-            <el-descriptions-item label="All Users Allowed">
-              <el-tag :type="yesNoTagType(product.is_all_users_allowed)">
-                {{ product.is_all_users_allowed ? 'Yes' : 'No' }}
-              </el-tag>
-            </el-descriptions-item>
-          </el-descriptions>
-        </el-card>
-
-        <el-card shadow="never">
-          <template #header>
-            <div class="font-semibold">Vendor & Guardrails</div>
-          </template>
-
-          <el-descriptions :column="1" border>
-            <el-descriptions-item label="Preferred Vendor">
-              {{ labelVendor(product.preferred_vendor_id ?? null) }}
-            </el-descriptions-item>
-            <el-descriptions-item label="Min Sales Price">{{ formatMoney(product.min_sales_price) }}</el-descriptions-item>
-            <el-descriptions-item label="Max Sales Price">{{ formatMoney(product.max_sales_price) }}</el-descriptions-item>
-            <el-descriptions-item label="Min Purchase Price">{{ formatMoney(product.min_purchase_price) }}</el-descriptions-item>
-            <el-descriptions-item label="Max Purchase Price">{{ formatMoney(product.max_purchase_price) }}</el-descriptions-item>
-          </el-descriptions>
-        </el-card>
-
-        <el-card shadow="never">
-          <template #header>
-            <div class="font-semibold">Account Overrides</div>
-          </template>
-
-          <el-descriptions :column="1" border>
-            <el-descriptions-item label="Inventory">{{ labelAccount(product.inventory_account_id ?? null) }}</el-descriptions-item>
-            <el-descriptions-item label="COGS">{{ labelAccount(product.cogs_account_id ?? null) }}</el-descriptions-item>
-            <el-descriptions-item label="Sales">{{ labelAccount(product.sales_account_id ?? null) }}</el-descriptions-item>
-            <el-descriptions-item label="Sales Discount">
-              {{ labelAccount(product.sales_discount_account_id ?? null) }}
-            </el-descriptions-item>
-            <el-descriptions-item label="Sales Return">
-              {{ labelAccount(product.sales_return_account_id ?? null) }}
-            </el-descriptions-item>
-            <el-descriptions-item label="Purchase Return">
-              {{ labelAccount(product.purchase_return_account_id ?? null) }}
-            </el-descriptions-item>
-            <el-descriptions-item label="Unbilled Receipt">
-              {{ labelAccount(product.unbilled_receipt_account_id ?? null) }}
-            </el-descriptions-item>
-            <el-descriptions-item label="Goods In Transit">
-              {{ labelAccount(product.goods_in_transit_account_id ?? null) }}
-            </el-descriptions-item>
-          </el-descriptions>
-
-          <div v-if="loadingLookups" class="mt-2 text-xs text-[var(--el-text-color-secondary)]">
-            Memuat lookup COA...
-          </div>
-        </el-card>
-
-        <el-card shadow="never" class="lg:col-span-2">
-          <template #header>
-            <div class="font-semibold">Units</div>
-          </template>
-
-          <el-table :data="units" class="w-full" border>
-            <el-table-column label="#" width="70" align="center">
-              <template #default="scope">
-                <div class="text-center">{{ scope.$index + 1 }}</div>
+    <el-tabs v-model="activeTab" class="mb-2">
+      <el-tab-pane label="Detail" name="detail">
+        <div v-loading="loading">
+          <div v-if="product" class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            <el-card shadow="never">
+              <template #header>
+                <div class="font-semibold">General</div>
               </template>
-            </el-table-column>
-            <el-table-column prop="unit_name" label="Unit" min-width="160" />
-            <el-table-column prop="ratio" label="Ratio" width="120" align="right" />
-            <el-table-column label="Base" width="110" align="center">
-              <template #default="scope">
-                <el-tag :type="scope.row.is_base_unit ? 'success' : 'info'">
-                  {{ scope.row.is_base_unit ? 'Yes' : 'No' }}
-                </el-tag>
+
+              <el-descriptions :column="1" border>
+                <el-descriptions-item label="Code">{{ product.code }}</el-descriptions-item>
+                <el-descriptions-item label="Name">{{ product.name }}</el-descriptions-item>
+                <el-descriptions-item label="Type">{{ typeLabel(product.type) }}</el-descriptions-item>
+                <el-descriptions-item label="Category">{{ product.category_name ?? '-' }}</el-descriptions-item>
+                <el-descriptions-item label="UoM">{{ product.uom }}</el-descriptions-item>
+                <el-descriptions-item label="On Hand">
+                  {{ product.on_hand_qty ?? '0' }}
+                </el-descriptions-item>
+                <el-descriptions-item label="Active">
+                  <el-tag :type="yesNoTagType(product.is_active)">{{ product.is_active ? 'Yes' : 'No' }}</el-tag>
+                </el-descriptions-item>
+              </el-descriptions>
+            </el-card>
+
+            <el-card shadow="never">
+              <template #header>
+                <div class="font-semibold">Inventory & Serial</div>
               </template>
-            </el-table-column>
-            <el-table-column label="Price L1" width="130" align="right">
-              <template #default="scope">{{ formatMoney(scope.row.price_level_1) }}</template>
-            </el-table-column>
-            <el-table-column label="Price L2" width="130" align="right">
-              <template #default="scope">{{ formatMoney(scope.row.price_level_2) }}</template>
-            </el-table-column>
-            <el-table-column label="Price L3" width="130" align="right">
-              <template #default="scope">{{ formatMoney(scope.row.price_level_3) }}</template>
-            </el-table-column>
-          </el-table>
 
-          <div v-if="units.length === 0" class="mt-3 text-sm text-[var(--el-text-color-secondary)]">
-            Tidak ada unit.
+              <el-descriptions :column="1" border>
+                <el-descriptions-item label="Use Serial">
+                  <el-tag :type="yesNoTagType(product.use_serial_number)">
+                    {{ product.use_serial_number ? 'Yes' : 'No' }}
+                  </el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="Default Warehouse">
+                  {{ labelWarehouse(product.default_warehouse_id ?? null) }}
+                </el-descriptions-item>
+                <el-descriptions-item label="Inventory Type">{{ product.inventory_type ?? '-' }}</el-descriptions-item>
+                <el-descriptions-item label="Tax Code">{{ product.tax_code ?? '-' }}</el-descriptions-item>
+                <el-descriptions-item label="All Users Allowed">
+                  <el-tag :type="yesNoTagType(product.is_all_users_allowed)">
+                    {{ product.is_all_users_allowed ? 'Yes' : 'No' }}
+                  </el-tag>
+                </el-descriptions-item>
+              </el-descriptions>
+            </el-card>
+
+            <el-card shadow="never">
+              <template #header>
+                <div class="font-semibold">Vendor & Guardrails</div>
+              </template>
+
+              <el-descriptions :column="1" border>
+                <el-descriptions-item label="Preferred Vendor">
+                  {{ labelVendor(product.preferred_vendor_id ?? null) }}
+                </el-descriptions-item>
+                <el-descriptions-item label="Min Sales Price">{{ formatMoney(product.min_sales_price) }}</el-descriptions-item>
+                <el-descriptions-item label="Max Sales Price">{{ formatMoney(product.max_sales_price) }}</el-descriptions-item>
+                <el-descriptions-item label="Min Purchase Price">{{ formatMoney(product.min_purchase_price) }}</el-descriptions-item>
+                <el-descriptions-item label="Max Purchase Price">{{ formatMoney(product.max_purchase_price) }}</el-descriptions-item>
+              </el-descriptions>
+            </el-card>
+
+            <el-card shadow="never">
+              <template #header>
+                <div class="font-semibold">Account Overrides</div>
+              </template>
+
+              <el-descriptions :column="1" border>
+                <el-descriptions-item label="Inventory">{{ labelAccount(product.inventory_account_id ?? null) }}</el-descriptions-item>
+                <el-descriptions-item label="COGS">{{ labelAccount(product.cogs_account_id ?? null) }}</el-descriptions-item>
+                <el-descriptions-item label="Sales">{{ labelAccount(product.sales_account_id ?? null) }}</el-descriptions-item>
+                <el-descriptions-item label="Sales Discount">
+                  {{ labelAccount(product.sales_discount_account_id ?? null) }}
+                </el-descriptions-item>
+                <el-descriptions-item label="Sales Return">
+                  {{ labelAccount(product.sales_return_account_id ?? null) }}
+                </el-descriptions-item>
+                <el-descriptions-item label="Purchase Return">
+                  {{ labelAccount(product.purchase_return_account_id ?? null) }}
+                </el-descriptions-item>
+                <el-descriptions-item label="Unbilled Receipt">
+                  {{ labelAccount(product.unbilled_receipt_account_id ?? null) }}
+                </el-descriptions-item>
+                <el-descriptions-item label="Goods In Transit">
+                  {{ labelAccount(product.goods_in_transit_account_id ?? null) }}
+                </el-descriptions-item>
+              </el-descriptions>
+
+              <div v-if="loadingLookups" class="mt-2 text-xs text-[var(--el-text-color-secondary)]">
+                Memuat lookup COA...
+              </div>
+            </el-card>
+
+            <el-card shadow="never" class="lg:col-span-2">
+              <template #header>
+                <div class="font-semibold">Units</div>
+              </template>
+
+              <el-table :data="units" class="w-full" border>
+                <el-table-column label="#" width="70" align="center">
+                  <template #default="scope">
+                    <div class="text-center">{{ scope.$index + 1 }}</div>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="unit_name" label="Unit" min-width="160" />
+                <el-table-column prop="ratio" label="Ratio" width="120" align="right" />
+                <el-table-column label="Base" width="110" align="center">
+                  <template #default="scope">
+                    <el-tag :type="scope.row.is_base_unit ? 'success' : 'info'">
+                      {{ scope.row.is_base_unit ? 'Yes' : 'No' }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="Price L1" width="130" align="right">
+                  <template #default="scope">{{ formatMoney(scope.row.price_level_1) }}</template>
+                </el-table-column>
+                <el-table-column label="Price L2" width="130" align="right">
+                  <template #default="scope">{{ formatMoney(scope.row.price_level_2) }}</template>
+                </el-table-column>
+                <el-table-column label="Price L3" width="130" align="right">
+                  <template #default="scope">{{ formatMoney(scope.row.price_level_3) }}</template>
+                </el-table-column>
+              </el-table>
+
+              <div v-if="units.length === 0" class="mt-3 text-sm text-[var(--el-text-color-secondary)]">
+                Tidak ada unit.
+              </div>
+            </el-card>
           </div>
-        </el-card>
-      </div>
 
-      <div v-else class="text-sm text-[var(--el-text-color-secondary)]">Memuat...</div>
-    </div>
+          <div v-else class="text-sm text-[var(--el-text-color-secondary)]">Memuat...</div>
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="Inventory Movement" name="inventory-movement">
+        <el-alert v-if="movementErrorMessage" type="error" :title="movementErrorMessage" show-icon class="mb-3" />
+
+        <el-table v-loading="loadingMovements" :data="movementRows" height="calc(100vh - 280px)" class="w-full">
+          <el-table-column prop="date" label="Date" width="140" />
+          <el-table-column prop="qty_in" label="In" width="120" align="right" />
+          <el-table-column prop="qty_out" label="Out" width="120" align="right" />
+          <el-table-column prop="ending_balance" label="Ending Balance" width="160" align="right" />
+          <el-table-column prop="invoice_number" label="Invoice Number" min-width="200" />
+          <el-table-column prop="source" label="Source" min-width="170" />
+        </el-table>
+
+        <div
+          v-if="!loadingMovements && !movementErrorMessage && movementRows.length === 0"
+          class="mt-3 text-sm text-[var(--el-text-color-secondary)]"
+        >
+          Tidak ada data.
+        </div>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>

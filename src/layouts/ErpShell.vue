@@ -12,7 +12,7 @@ import { useTabsStore } from '../stores/tabs'
 import { AUTH_ENABLED } from '../config/auth'
 import { TENANT_SWITCHER_ENABLED } from '../config/tenant'
 import { useTenantStore } from '../stores/tenant'
-import { MENU_ITEMS, type MenuItemConfig } from '../config/menu'
+import { MENU_SECTIONS, type MenuItemConfig, type MenuSectionConfig } from '../config/menu'
 import { getBootstrap } from '../lib/api/modules/system'
 
 const tabsStore = useTabsStore()
@@ -22,7 +22,7 @@ const router = useRouter()
 const authEnabled = AUTH_ENABLED
 const tenantSwitcherEnabled = TENANT_SWITCHER_ENABLED
 
-const menuItems = computed<MenuItemConfig[]>(() => MENU_ITEMS)
+const menuSections = computed<MenuSectionConfig[]>(() => MENU_SECTIONS)
 
 function openMenu(item: MenuItemConfig) {
   const result = tabsStore.openModule({
@@ -46,7 +46,7 @@ function openMenu(item: MenuItemConfig) {
 
 watchEffect(() => {
   if (tabsStore.modules.length !== 0) return
-  const first = menuItems.value[0]
+  const first = menuSections.value[0]?.items?.[0]
   if (first) openMenu(first)
 })
 
@@ -91,14 +91,16 @@ onMounted(async () => {
         ERP
       </div>
       <el-menu :default-active="tabsStore.activeModuleId ?? undefined">
-        <el-menu-item
-          v-for="item in menuItems"
-          :key="item.id"
-          :index="item.id"
-          @click="openMenu(item)"
-        >
-          {{ item.title }}
-        </el-menu-item>
+        <el-menu-item-group v-for="section in menuSections" :key="section.id" :title="section.title">
+          <el-menu-item
+            v-for="item in section.items"
+            :key="item.id"
+            :index="item.id"
+            @click="openMenu(item)"
+          >
+            {{ item.title }}
+          </el-menu-item>
+        </el-menu-item-group>
       </el-menu>
     </el-aside>
 

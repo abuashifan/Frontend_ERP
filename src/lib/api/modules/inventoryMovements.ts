@@ -46,6 +46,22 @@ export type CreateInventoryMovementPayload = {
   }>
 }
 
+export type ProductInventoryMovementRow = {
+  date: string
+  qty_in: string
+  qty_out: string
+  ending_balance: string
+  invoice_number: string
+  source: string
+  reference_type: string | null
+  reference_id: number | null
+}
+
+export type ProductInventoryMovementsResponse = {
+  opening_balance: string
+  data: ProductInventoryMovementRow[]
+}
+
 export async function listInventoryMovements(): Promise<InventoryMovement[]> {
   const tenantStore = useTenantStore()
   if (!tenantStore.activeCompanyId) throw new Error('company_id belum diset')
@@ -92,4 +108,24 @@ export async function deleteInventoryMovement(id: number): Promise<void> {
 export async function postInventoryMovement(id: number): Promise<InventoryMovement> {
   const res: AxiosResponse<ApiEnvelope<InventoryMovement>> = await api.post(`/inventory-movements/${id}/post`)
   return unwrapData<InventoryMovement>(res.data)
+}
+
+export async function getProductInventoryMovements(
+  productId: number,
+  params?: { from_date?: string; to_date?: string },
+): Promise<ProductInventoryMovementsResponse> {
+  const tenantStore = useTenantStore()
+  if (!tenantStore.activeCompanyId) throw new Error('company_id belum diset')
+
+  const res: AxiosResponse<ProductInventoryMovementsResponse> = await api.get(
+    `/products/${productId}/inventory-movements`,
+    {
+      params: {
+        company_id: Number(tenantStore.activeCompanyId),
+        ...params,
+      },
+    },
+  )
+
+  return res.data
 }
