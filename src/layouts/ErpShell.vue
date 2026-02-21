@@ -90,18 +90,20 @@ onMounted(async () => {
       >
         ERP
       </div>
-      <el-menu :default-active="tabsStore.activeModuleId ?? undefined">
-        <el-menu-item-group v-for="section in menuSections" :key="section.id" :title="section.title">
-          <el-menu-item
-            v-for="item in section.items"
-            :key="item.id"
-            :index="item.id"
-            @click="openMenu(item)"
-          >
-            {{ item.title }}
-          </el-menu-item>
-        </el-menu-item-group>
-      </el-menu>
+      <el-scrollbar>
+        <el-menu :default-active="tabsStore.activeModuleId ?? undefined">
+          <el-menu-item-group v-for="section in menuSections" :key="section.id" :title="section.title">
+            <el-menu-item
+              v-for="item in section.items"
+              :key="item.id"
+              :index="item.id"
+              @click="openMenu(item)"
+            >
+              {{ item.title }}
+            </el-menu-item>
+          </el-menu-item-group>
+        </el-menu>
+      </el-scrollbar>
     </el-aside>
 
     <el-container>

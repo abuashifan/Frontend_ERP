@@ -269,11 +269,7 @@ export const MENU_SECTIONS: MenuSectionConfig[] = [
         defaultChild: {
           localId: 'list',
           title: 'Chart of Accounts',
-          component: 'PlaceholderWorkspace',
-          props: {
-            title: 'Chart of Accounts',
-            description: 'Planned: COA list/detail (read-only) for Phase 7.2.',
-          },
+          component: 'ChartOfAccountsListWorkspace',
           closable: false,
         },
       },

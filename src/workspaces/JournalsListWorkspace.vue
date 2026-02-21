@@ -3,12 +3,15 @@ import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import { listJournals, type Journal } from '../lib/api/modules/journals'
+import { useTabsStore } from '../stores/tabs'
 
 defineProps<{ tabId: string }>()
 
 const loading = ref(false)
 const errorMessage = ref<string | null>(null)
 const rows = ref<Journal[]>([])
+
+const tabsStore = useTabsStore()
 
 const filters = ref({
   source_type: '' as string,
@@ -45,6 +48,17 @@ function sumDebit(row: Journal) {
 
 function sumCredit(row: Journal) {
   return row.lines.reduce((acc, ln) => acc + Number(ln.credit ?? 0), 0)
+}
+
+function openNew() {
+  const result = tabsStore.openChildTab({
+    localId: 'new',
+    title: 'New Journal',
+    component: 'JournalFormWorkspace',
+    closable: true,
+  })
+
+  if (!result.ok) ElMessage.warning(result.message)
 }
 async function load() {
   loading.value = true
@@ -101,6 +115,7 @@ onMounted(() => {
         </div>
       </div>
       <div class="flex items-center gap-2">
+        <el-button size="small" type="primary" @click="openNew">New</el-button>
         <el-button size="small" :loading="loading" @click="load">Refresh</el-button>
       </div>
     </div>

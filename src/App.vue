@@ -1,3 +1,10 @@
+<script setup lang="ts">
+import { ElConfigProvider } from 'element-plus'
+import id from 'element-plus/es/locale/lang/id'
+</script>
+
 <template>
-  <RouterView />
+  <ElConfigProvider :locale="id">
+    <RouterView />
+  </ElConfigProvider>
 </template>

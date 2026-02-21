@@ -75,6 +75,16 @@ const unitsSaving = ref(false)
 type ProductUnitDraft = Omit<ProductUnit, 'id' | 'product_id'> & { id?: number; product_id?: number }
 const units = ref<ProductUnitDraft[]>([])
 
+function toInputNumber(value: unknown): number | undefined {
+  if (value === null || value === undefined || value === '') return undefined
+  const num = typeof value === 'number' ? value : Number(String(value))
+  return Number.isFinite(num) ? num : undefined
+}
+
+function fromInputNumber(value: number | undefined | null): number | null {
+  return value === undefined || value === null ? null : value
+}
+
 function accountLabel(a: ChartOfAccount): string {
   return `${a.code} — ${a.name}`
 }
@@ -393,19 +403,43 @@ onMounted(() => {
       </el-form-item>
 
       <el-form-item label="Min Sales Price (optional)">
-        <el-input v-model="model.min_sales_price" inputmode="decimal" placeholder="Optional" />
+        <el-input-number
+          :model-value="toInputNumber(model.min_sales_price)"
+          :min="0"
+          controls-position="right"
+          class="w-full"
+          @update:model-value="(v: number | undefined | null) => (model.min_sales_price = fromInputNumber(v))"
+        />
       </el-form-item>
 
       <el-form-item label="Max Sales Price (optional)">
-        <el-input v-model="model.max_sales_price" inputmode="decimal" placeholder="Optional" />
+        <el-input-number
+          :model-value="toInputNumber(model.max_sales_price)"
+          :min="0"
+          controls-position="right"
+          class="w-full"
+          @update:model-value="(v: number | undefined | null) => (model.max_sales_price = fromInputNumber(v))"
+        />
       </el-form-item>
 
       <el-form-item label="Min Purchase Price (optional)">
-        <el-input v-model="model.min_purchase_price" inputmode="decimal" placeholder="Optional" />
+        <el-input-number
+          :model-value="toInputNumber(model.min_purchase_price)"
+          :min="0"
+          controls-position="right"
+          class="w-full"
+          @update:model-value="(v: number | undefined | null) => (model.min_purchase_price = fromInputNumber(v))"
+        />
       </el-form-item>
 
       <el-form-item label="Max Purchase Price (optional)">
-        <el-input v-model="model.max_purchase_price" inputmode="decimal" placeholder="Optional" />
+        <el-input-number
+          :model-value="toInputNumber(model.max_purchase_price)"
+          :min="0"
+          controls-position="right"
+          class="w-full"
+          @update:model-value="(v: number | undefined | null) => (model.max_purchase_price = fromInputNumber(v))"
+        />
       </el-form-item>
 
       <el-divider content-position="left">Account Overrides</el-divider>
@@ -491,7 +525,13 @@ onMounted(() => {
 
         <el-table-column label="Ratio" width="120">
           <template #default="scope">
-            <el-input v-model="scope.row.ratio" inputmode="decimal" />
+            <el-input-number
+              :model-value="toInputNumber(scope.row.ratio)"
+              :min="0"
+              controls-position="right"
+              class="w-full"
+              @update:model-value="(v: number | undefined | null) => (scope.row.ratio = v ?? '')"
+            />
           </template>
         </el-table-column>
 
@@ -503,31 +543,61 @@ onMounted(() => {
 
         <el-table-column label="PL1" width="120">
           <template #default="scope">
-            <el-input v-model="scope.row.price_level_1" inputmode="decimal" />
+            <el-input-number
+              :model-value="toInputNumber(scope.row.price_level_1)"
+              :min="0"
+              controls-position="right"
+              class="w-full"
+              @update:model-value="(v: number | undefined | null) => (scope.row.price_level_1 = fromInputNumber(v))"
+            />
           </template>
         </el-table-column>
 
         <el-table-column label="PL2" width="120">
           <template #default="scope">
-            <el-input v-model="scope.row.price_level_2" inputmode="decimal" />
+            <el-input-number
+              :model-value="toInputNumber(scope.row.price_level_2)"
+              :min="0"
+              controls-position="right"
+              class="w-full"
+              @update:model-value="(v: number | undefined | null) => (scope.row.price_level_2 = fromInputNumber(v))"
+            />
           </template>
         </el-table-column>
 
         <el-table-column label="PL3" width="120">
           <template #default="scope">
-            <el-input v-model="scope.row.price_level_3" inputmode="decimal" />
+            <el-input-number
+              :model-value="toInputNumber(scope.row.price_level_3)"
+              :min="0"
+              controls-position="right"
+              class="w-full"
+              @update:model-value="(v: number | undefined | null) => (scope.row.price_level_3 = fromInputNumber(v))"
+            />
           </template>
         </el-table-column>
 
         <el-table-column label="PL4" width="120">
           <template #default="scope">
-            <el-input v-model="scope.row.price_level_4" inputmode="decimal" />
+            <el-input-number
+              :model-value="toInputNumber(scope.row.price_level_4)"
+              :min="0"
+              controls-position="right"
+              class="w-full"
+              @update:model-value="(v: number | undefined | null) => (scope.row.price_level_4 = fromInputNumber(v))"
+            />
           </template>
         </el-table-column>
 
         <el-table-column label="PL5" width="120">
           <template #default="scope">
-            <el-input v-model="scope.row.price_level_5" inputmode="decimal" />
+            <el-input-number
+              :model-value="toInputNumber(scope.row.price_level_5)"
+              :min="0"
+              controls-position="right"
+              class="w-full"
+              @update:model-value="(v: number | undefined | null) => (scope.row.price_level_5 = fromInputNumber(v))"
+            />
           </template>
         </el-table-column>
 

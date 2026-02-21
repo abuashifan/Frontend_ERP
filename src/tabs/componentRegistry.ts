@@ -7,6 +7,13 @@ export const tabComponentRegistry: Record<string, Component> = {
   CompanySettingsWorkspace: defineAsyncComponent(
     () => import('../workspaces/CompanySettingsWorkspace.vue'),
   ),
+  ChartOfAccountsListWorkspace: defineAsyncComponent(
+    () => import('../workspaces/ChartOfAccountsListWorkspace.vue'),
+  ),
+  ChartOfAccountFormWorkspace: defineAsyncComponent(
+    () => import('../workspaces/ChartOfAccountFormWorkspace.vue'),
+  ),
+  JournalFormWorkspace: defineAsyncComponent(() => import('../workspaces/JournalFormWorkspace.vue')),
   JournalsListWorkspace: defineAsyncComponent(() => import('../workspaces/JournalsListWorkspace.vue')),
   CustomersListWorkspace: defineAsyncComponent(() => import('../workspaces/CustomersListWorkspace.vue')),
   CustomerFormWorkspace: defineAsyncComponent(() => import('../workspaces/CustomerFormWorkspace.vue')),

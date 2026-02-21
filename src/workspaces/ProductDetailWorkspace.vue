@@ -9,6 +9,8 @@ import { listVendors, type Vendor } from '../lib/api/modules/vendors'
 import { listChartOfAccounts, type ChartOfAccount } from '../lib/api/modules/chartOfAccounts'
 import {
   getProductInventoryMovements,
+  listInventoryMovements,
+  type InventoryMovementLine,
   type ProductInventoryMovementRow,
 } from '../lib/api/modules/inventoryMovements'
 import { useTabsStore } from '../stores/tabs'
@@ -26,6 +28,16 @@ const activeTab = ref<'detail' | 'inventory-movement'>('detail')
 const loadingMovements = ref(false)
 const movementErrorMessage = ref<string | null>(null)
 const movementRows = ref<ProductInventoryMovementRow[]>([])
+
+const loadingLayers = ref(false)
+const layersErrorMessage = ref<string | null>(null)
+type CostLayerRow = { unit_cost: number | null; qty: number }
+const costLayers = ref<CostLayerRow[]>([])
+
+const totalLayerQty = computed(() => costLayers.value.reduce((sum, row) => sum + Number(row.qty || 0), 0))
+const totalLayerValue = computed(() =>
+  costLayers.value.reduce((sum, row) => sum + (Number(row.unit_cost ?? 0) * Number(row.qty || 0)), 0),
+)
 
 const product = ref<Product | null>(null)
 const units = ref<ProductUnit[]>([])
@@ -99,6 +111,7 @@ async function load() {
     const [p, u] = await Promise.all([getProduct(props.productId), listProductUnits(props.productId)])
     product.value = p
     units.value = u
+    void loadCostLayers()
   } catch (err: unknown) {
     const maybe = err as { response?: { data?: { message?: unknown } }; message?: unknown }
     const message = maybe?.response?.data?.message ?? maybe?.message ?? 'Gagal memuat product'
@@ -157,6 +170,7 @@ function openSerialRegistry() {
 onMounted(() => {
   void loadLookups()
   void load()
+  void loadCostLayers()
 })
 
 watch(
@@ -167,6 +181,81 @@ watch(
     }
   },
 )
+
+async function loadCostLayers() {
+  loadingLayers.value = true
+  layersErrorMessage.value = null
+  costLayers.value = []
+
+  try {
+    const movements = await listInventoryMovements()
+
+    // keep only posted movements and sort chronologically
+    const posted = movements
+      .filter((m) => m.status === 'posted')
+      .sort((a, b) => new Date(a.movement_date).getTime() - new Date(b.movement_date).getTime())
+
+    type Layer = { qty: number; unit_cost: number | null; date: string }
+    const fifo: Layer[] = []
+
+    for (const m of posted) {
+      const lines: InventoryMovementLine[] = m.lines ?? []
+      for (const l of lines) {
+        if (l.product_id !== props.productId) continue
+        const qty = Math.abs(Number(l.qty))
+        if (!Number.isFinite(qty) || qty === 0) continue
+
+        const rawUnitCost = l.unit_cost
+        const parsedUnitCost =
+          rawUnitCost === null || rawUnitCost === undefined || rawUnitCost === ''
+            ? null
+            : Number(rawUnitCost)
+        const unitCost = Number.isFinite(parsedUnitCost as number) ? (parsedUnitCost as number) : null
+
+        if (m.type === 'in') {
+          fifo.push({ qty, unit_cost: unitCost, date: m.movement_date })
+        } else {
+          // consume FIFO
+          let remaining = qty
+          while (remaining > 0 && fifo.length > 0) {
+            const head = fifo[0]
+            if (!head) break
+            if (head.qty > remaining) {
+              head.qty -= remaining
+              remaining = 0
+            } else {
+              remaining -= head.qty
+              fifo.shift()
+            }
+          }
+          // if remaining > 0 we consumed more than available; ignore negative stock for layers
+        }
+      }
+    }
+
+    // group remaining layers by unit_cost
+    const map = new Map<string, CostLayerRow>()
+    for (const f of fifo) {
+      const key = f.unit_cost === null ? 'null' : String(f.unit_cost)
+      const existing = map.get(key)
+      if (existing) existing.qty += f.qty
+      else map.set(key, { unit_cost: f.unit_cost, qty: f.qty })
+    }
+
+    costLayers.value = Array.from(map.values()).sort((a, b) => {
+      const ac = a.unit_cost ?? 0
+      const bc = b.unit_cost ?? 0
+      return ac - bc
+    })
+  } catch (err: unknown) {
+    const maybe = err as { response?: { data?: { message?: unknown } }; message?: unknown }
+    const message = maybe?.response?.data?.message ?? maybe?.message ?? 'Gagal memuat cost layers'
+    layersErrorMessage.value = String(message)
+    ElMessage.error(layersErrorMessage.value)
+  } finally {
+    loadingLayers.value = false
+  }
+}
 </script>
 
 <template>
@@ -324,6 +413,39 @@ watch(
 
               <div v-if="units.length === 0" class="mt-3 text-sm text-[var(--el-text-color-secondary)]">
                 Tidak ada unit.
+              </div>
+            </el-card>
+
+            <el-card shadow="never" class="lg:col-span-2">
+              <template #header>
+                <div class="font-semibold">Cost Layers (FIFO)</div>
+              </template>
+
+              <div v-if="loadingLayers" class="text-sm text-[var(--el-text-color-secondary)]">Memuat cost layers...</div>
+              <el-alert v-if="layersErrorMessage" type="error" :title="layersErrorMessage" show-icon class="mb-3" />
+
+              <el-table v-if="!loadingLayers && costLayers.length > 0" :data="costLayers" class="w-full" border>
+                <el-table-column label="#" width="70" align="center">
+                  <template #default="scope">
+                    <div class="text-center">{{ scope.$index + 1 }}</div>
+                  </template>
+                </el-table-column>
+                <el-table-column label="Unit Cost" width="160" align="right">
+                  <template #default="scope">{{ scope.row.unit_cost === null ? '-' : formatMoney(scope.row.unit_cost) }}</template>
+                </el-table-column>
+                <el-table-column label="Qty" width="120" align="right">
+                  <template #default="scope">{{ scope.row.qty }}</template>
+                </el-table-column>
+                <el-table-column label="Total Cost" width="160" align="right">
+                  <template #default="scope">{{ scope.row.unit_cost === null ? '-' : formatMoney(Number(scope.row.unit_cost) * Number(scope.row.qty)) }}</template>
+                </el-table-column>
+              </el-table>
+
+              <div v-if="!loadingLayers && costLayers.length === 0" class="mt-3 text-sm text-[var(--el-text-color-secondary)]">Tidak ada cost layer (tidak ada stock).</div>
+
+              <div v-if="costLayers.length > 0" class="mt-3 text-sm text-[var(--el-text-color-secondary)]">
+                <div>Total Qty: <strong>{{ totalLayerQty }}</strong></div>
+                <div>Total Value: <strong>{{ formatMoney(totalLayerValue) }}</strong></div>
               </div>
             </el-card>
           </div>
