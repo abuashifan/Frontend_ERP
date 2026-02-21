@@ -54,6 +54,43 @@ export async function setupCompany(payload: SetupCompanyPayload) {
   return res.data
 }
 
+export type CompanySettingsResponse = {
+  data: {
+    company: {
+      id: number
+      code: string
+      name: string
+      base_currency: string
+      fiscal_year_start_month: number
+      fiscal_year_start_year: number
+      timezone: string
+      is_active: boolean
+    }
+    profile: Record<string, unknown>
+  }
+}
+
+export async function getCompanySettings() {
+  const res = await api.get<CompanySettingsResponse>('/system/company/settings')
+  return res.data
+}
+
+export type UpdateCompanySettingsPayload = {
+  name?: string
+  code?: string | null
+  base_currency?: string | null
+  fiscal_year_start_month?: number | null
+  fiscal_year_start_year?: number | null
+  timezone?: string | null
+  is_active?: boolean
+  profile?: Record<string, unknown> | null
+}
+
+export async function updateCompanySettings(payload: UpdateCompanySettingsPayload) {
+  const res = await api.put<CompanySettingsResponse>('/system/company/settings', payload)
+  return res.data
+}
+
 export type EnsurePeriodsResponse = {
   data: {
     company_id: number
