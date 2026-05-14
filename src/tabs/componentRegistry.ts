@@ -14,6 +14,7 @@ export const tabComponentRegistry: Record<string, Component> = {
     () => import('../workspaces/ChartOfAccountFormWorkspace.vue'),
   ),
   JournalFormWorkspace: defineAsyncComponent(() => import('../workspaces/JournalFormWorkspace.vue')),
+  JournalDetailWorkspace: defineAsyncComponent(() => import('../workspaces/JournalDetailWorkspace.vue')),
   JournalsListWorkspace: defineAsyncComponent(() => import('../workspaces/JournalsListWorkspace.vue')),
   CustomersListWorkspace: defineAsyncComponent(() => import('../workspaces/CustomersListWorkspace.vue')),
   CustomerFormWorkspace: defineAsyncComponent(() => import('../workspaces/CustomerFormWorkspace.vue')),

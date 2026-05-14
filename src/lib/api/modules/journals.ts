@@ -1,5 +1,22 @@
 import { api } from '../client'
 
+export type JournalListItem = {
+  id: number
+  journal_number: string
+  source_type: string
+  source_label: string
+  journal_date: string
+  description: string
+  status: string
+  total_debit: string | number
+  total_credit: string | number
+  amount: string | number
+  created_by: number | null
+  created_by_name: string | null
+  posted_at: string | null
+  created_at: string
+}
+
 export type JournalLine = {
   id: number
   journal_id: number
@@ -17,7 +34,6 @@ export type JournalLine = {
 export type Journal = {
   id: number
   journal_number: string
-  company_id: number
   period_id: number
   journal_date: string
   source_type: string
@@ -29,7 +45,7 @@ export type Journal = {
 }
 
 export type ListJournalsResponse = {
-  data: Journal[]
+  data: JournalListItem[]
 }
 
 export type ListJournalsParams = {
@@ -43,6 +59,15 @@ export type ListJournalsParams = {
 
 export async function listJournals(params: ListJournalsParams = {}) {
   const res = await api.get<ListJournalsResponse>('/journals', { params })
+  return res.data.data
+}
+
+export type GetJournalResponse = {
+  data: Journal
+}
+
+export async function getJournal(id: number) {
+  const res = await api.get<GetJournalResponse>(`/journals/${id}`)
   return res.data.data
 }
 

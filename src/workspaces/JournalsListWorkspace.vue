@@ -2,14 +2,14 @@
 import { computed, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
-import { listJournals, type Journal } from '../lib/api/modules/journals'
+import { listJournals, type JournalListItem } from '../lib/api/modules/journals'
 import { useTabsStore } from '../stores/tabs'
 
 defineProps<{ tabId: string }>()
 
 const loading = ref(false)
 const errorMessage = ref<string | null>(null)
-const rows = ref<Journal[]>([])
+const rows = ref<JournalListItem[]>([])
 
 const tabsStore = useTabsStore()
 
@@ -42,12 +42,31 @@ const canSearch = computed(() => {
   )
 })
 
-function sumDebit(row: Journal) {
-  return row.lines.reduce((acc, ln) => acc + Number(ln.debit ?? 0), 0)
+function formatMoney(value: unknown): string {
+  if (value === null || value === undefined || value === '') return 'Rp 0,00'
+  const num = typeof value === 'number' ? value : Number(String(value))
+  if (!Number.isFinite(num)) return 'Rp 0,00'
+  const formatted = new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num)
+  return `Rp ${formatted}`
 }
 
-function sumCredit(row: Journal) {
-  return row.lines.reduce((acc, ln) => acc + Number(ln.credit ?? 0), 0)
+function statusTagType(status: string) {
+  if (status === 'posted') return 'success'
+  if (status === 'draft') return 'info'
+  if (status === 'approved') return 'warning'
+  if (status === 'reversed') return 'danger'
+  return 'info'
+}
+
+function openDetail(row: JournalListItem) {
+  const result = tabsStore.openChildTab({
+    localId: `detail-${row.id}`,
+    title: `Journal ${row.journal_number}`,
+    component: 'JournalDetailWorkspace',
+    props: { journalId: row.id },
+    closable: true,
+  })
+  if (!result.ok) ElMessage.warning(result.message)
 }
 
 function openNew() {
@@ -167,45 +186,33 @@ onMounted(() => {
 
     <el-alert v-if="errorMessage" type="error" :title="errorMessage" show-icon class="mb-3" />
 
-    <el-table v-loading="loading" :data="rows" height="calc(100vh - 330px)" class="w-full">
-      <el-table-column type="expand">
+    <el-table v-loading="loading" :data="rows" height="calc(100vh - 330px)" class="w-full" @row-dblclick="openDetail">
+      <el-table-column type="selection" width="44" />
+      <el-table-column type="index" label="No" width="60" />
+      <el-table-column prop="journal_number" label="No. Jurnal" min-width="180" />
+      <el-table-column prop="source_label" label="Sumber" width="170" />
+      <el-table-column prop="journal_date" label="Tanggal" width="120" />
+      <el-table-column prop="description" label="Deskripsi" min-width="260">
         <template #default="scope">
-          <div class="p-2">
-            <div class="text-sm font-medium mb-2">Lines</div>
-            <el-table :data="scope.row.lines" size="small" class="w-full">
-              <el-table-column prop="account.code" label="Account" width="140" />
-              <el-table-column prop="account.name" label="Account Name" min-width="220" />
-              <el-table-column prop="debit" label="Debit" width="140" />
-              <el-table-column prop="credit" label="Credit" width="140" />
-              <el-table-column prop="description" label="Desc" min-width="200" />
-            </el-table>
-          </div>
+          <div class="truncate" :title="scope.row.description">{{ scope.row.description }}</div>
         </template>
       </el-table-column>
-
-      <el-table-column prop="id" label="ID" width="90" />
-      <el-table-column prop="journal_date" label="Date" width="120" />
-      <el-table-column prop="journal_number" label="#" width="180" />
-      <el-table-column prop="status" label="Status" width="110">
+      <el-table-column prop="amount" label="Nilai" width="160" align="right">
         <template #default="scope">
-          <el-tag :type="scope.row.status === 'posted' ? 'success' : scope.row.status === 'draft' ? 'info' : 'warning'">
-            {{ scope.row.status }}
-          </el-tag>
+          {{ formatMoney(scope.row.amount) }}
         </template>
       </el-table-column>
-      <el-table-column prop="source_type" label="Source Type" width="170" />
-      <el-table-column prop="source_id" label="Source ID" width="110" />
-      <el-table-column label="Debit" width="140">
+      <el-table-column prop="created_by_name" label="Pengguna" width="160" />
+      <el-table-column prop="status" label="Status" width="120">
         <template #default="scope">
-          {{ sumDebit(scope.row).toFixed(2) }}
+          <el-tag :type="statusTagType(scope.row.status)">{{ scope.row.status }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="Credit" width="140">
+      <el-table-column label="Aksi" width="120" fixed="right">
         <template #default="scope">
-          {{ sumCredit(scope.row).toFixed(2) }}
+          <el-button size="small" @click="openDetail(scope.row)">Detail</el-button>
         </template>
       </el-table-column>
-      <el-table-column prop="description" label="Description" min-width="260" />
     </el-table>
 
     <div v-if="!loading && !errorMessage && rows.length === 0" class="mt-3 text-sm text-[var(--el-text-color-secondary)]">
